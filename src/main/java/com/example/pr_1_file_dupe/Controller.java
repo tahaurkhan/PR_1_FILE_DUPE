@@ -3,10 +3,12 @@ package com.example.pr_1_file_dupe;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 
 public class Controller {
-//    @FXML
-//    private Label welcomeText;
+    @FXML
+private BorderPane mainLayout;
+
 
 
     public void Categories(javafx.event.ActionEvent actionEvent) {
