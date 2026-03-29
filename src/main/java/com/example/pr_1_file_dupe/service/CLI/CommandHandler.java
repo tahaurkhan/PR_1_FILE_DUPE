@@ -28,4 +28,7 @@ public class CommandHandler {
         System.out.println("Scanning directory: " + path);
 
         // 3. Validate path
-        File dir = new File(path);}}
+        File dir = new File(path);
+
+    }
+    }
