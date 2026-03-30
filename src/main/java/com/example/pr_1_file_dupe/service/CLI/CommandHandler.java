@@ -3,7 +3,7 @@ package com.example.pr_1_file_dupe.service.CLI;
 
 import java.io.File;
 
-import com.example.pr_1_file_dupe.scanner.FileScanner; // adjust if your package name differs
+import com.example.pr_1_file_dupe.service.FileScanner; // adjust if your package name differs
 
 public class CommandHandler {
 
