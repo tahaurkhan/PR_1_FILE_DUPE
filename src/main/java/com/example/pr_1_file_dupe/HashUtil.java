@@ -18,7 +18,8 @@ public class HashUtil {
             while ((bytesRead = fis.read(byteArray)) != -1) {
                 md.update(byteArray, 0, bytesRead);
             }
-
+//hi  m thau
+            
             fis.close();
 
             byte[] hashBytes = md.digest();

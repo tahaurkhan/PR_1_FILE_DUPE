@@ -14,11 +14,11 @@ public class _check_fileScanner {
 		// TODO Auto-generated method stub
 		FileScanner scanner = new FileScanner();
 		List<FileData> files = scanner.scanDirectory("/home/tahaur/Downloads");
-//		double file_count =0;
-//		for (FileData f : files) {
-//		    System.out.println(file_count++ + f.getPath());
-//		}
-		System.out.println("Program is running ......!"+files);
+		double file_count =0;
+		for (FileData f : files) {
+		    System.out.println(file_count++ + f.getPath());
+		}
+		System.out.println("Program is running ......!");
 	}
 
 }
