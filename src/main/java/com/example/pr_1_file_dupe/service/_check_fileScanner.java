@@ -13,7 +13,11 @@ public class _check_fileScanner {
 	}
 
 	public static void main(String[] args) {
+		
+		
 //		***************insert all file in List*************************
+		
+		
 		FileScanner scanner = new FileScanner();
 		List<FileData> files = scanner.scanDirectory("/home/tahaur/Downloads");
 		double dupe_file_count =0;
@@ -22,9 +26,10 @@ public class _check_fileScanner {
 //		}
 //		System.out.println("Program is running ......!");
 //		
-//		FileScanner scanner = new FileScanner();
-//		List<FileData> files = scanner.scanDirectory("/your/path");
+//
 //		**********************Duplicates finder ******************************
+		
+		
 		DuplicateFinder finder = new DuplicateFinder();
 
 		Map<String, List<FileData>> result = finder.findDuplicates(files);
