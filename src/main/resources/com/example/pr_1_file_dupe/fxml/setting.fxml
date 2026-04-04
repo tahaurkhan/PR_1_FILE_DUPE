@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.paint.LinearGradient?>
+<?import javafx.scene.paint.Stop?>
+<?import javafx.scene.shape.Rectangle?>
+
+<HBox prefHeight="800.0" prefWidth="1200.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox prefWidth="250.0" spacing="10" styleClass="sidebar">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+               <padding><Insets bottom="30" top="10" /></padding>
+               <Rectangle arcHeight="10" arcWidth="10" fill="#006565" height="40" width="40" />
+               <VBox>
+                  <Label style="-fx-font-size: 18;" styleClass="headline" text="Dupelicated Scan" />
+                  <Label style="-fx-font-size: 9; -fx-text-fill: #6e7979;" text="FILE ARCHITECT V1.0" />
+               </VBox>
+            </HBox>
+            
+            <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="nav-item" text="Dashboard" />
+            <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="nav-item" text="Scan" />
+            <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="nav-item" text="Results" />
+            <Button alignment="BASELINE_LEFT" maxWidth="Infinity" styleClass="nav-item, nav-item-active" text="Settings" />
+            
+            <Spacer VBox.vgrow="ALWAYS" />
+            
+            <Button maxWidth="Infinity" styleClass="button-primary" text="+ Start New Scan" />
+         </children>
+      </VBox>
+
+      <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" HBox.hgrow="ALWAYS">
+         <VBox spacing="30" style="-fx-padding: 40;">
+            <children>
+               <VBox spacing="5">
+                  <Label style="-fx-font-size: 32;" styleClass="headline" text="Preferences" />
+                  <Label style="-fx-text-fill: #3e4949;" text="Configure how Duplicate Architect analyzes and manages your file system." />
+               </VBox>
+
+               <GridPane hgap="20" vgap="20">
+                  <columnConstraints>
+                     <ColumnConstraints percentWidth="65" />
+                     <ColumnConstraints percentWidth="35" />
+                  </columnConstraints>
+
+                  <VBox spacing="15" styleClass="card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                     <Label style="-fx-font-size: 18;" styleClass="headline" text="Comparison Algorithm" />
+                     <VBox spacing="10">
+                        <RadioButton selected="true" style="-fx-font-weight: bold;" text="Content Hash (Byte-by-byte)" />
+                        <Label style="-fx-font-size: 12; -fx-text-fill: #3e4949;" text="Generates a unique fingerprint for every file. 100% accuracy." wrapText="true" />
+                        
+                        <Separator />
+                        
+                        <RadioButton text="Name &amp; File Size" />
+                        <RadioButton text="Name Only" />
+                     </VBox>
+                  </VBox>
+
+                  <VBox spacing="15" styleClass="card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                     <Label style="-fx-font-size: 18;" styleClass="headline" text="Performance" wrapText="true">
+                        <textFill>
+                           <LinearGradient endX="1.0" endY="1.0">
+                              <stops>
+                                 <Stop>
+                                    <color>
+                                       <Color />
+                                    </color>
+                                 </Stop>
+                                 <Stop offset="1.0">
+                                    <color>
+                                       <Color red="1.0" green="1.0" blue="1.0" />
+                                    </color>
+                                 </Stop>
+                              </stops>
+                           </LinearGradient>
+                        </textFill></Label>
+                     <VBox spacing="10">
+                        <Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="MAX THREADS" />
+                        <TextField style="-fx-background-color: #f0f4f3;" text="8" />
+                        
+                        <Label style="-fx-font-size: 10; -fx-font-weight: bold;" text="MIN FILE SIZE (KB)" />
+                        <TextField style="-fx-background-color: #f0f4f3; -fx-border-color: #ba1a1a; -fx-border-width: 1;" text="0" />
+                     </VBox>
+                  </VBox>
+                  <rowConstraints>
+                     <RowConstraints />
+                  </rowConstraints>
+               </GridPane>
+
+               <HBox alignment="CENTER_RIGHT" spacing="15" style="-fx-padding: 20 0 0 0; -fx-border-color: #bdc9c8; -fx-border-width: 1 0 0 0;">
+                  <Button style="-fx-background-color: transparent;" text="Discard Changes" />
+                  <Button styleClass="button-primary" text="Apply Architecture" />
+               </HBox>
+            </children>
+         </VBox>
+      </ScrollPane>
+   </children>
+</HBox>
