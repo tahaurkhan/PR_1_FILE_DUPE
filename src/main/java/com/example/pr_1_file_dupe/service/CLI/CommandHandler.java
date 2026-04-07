@@ -11,7 +11,7 @@ public class CommandHandler {
 
         // 1. Help command
         if (args.length > 0 && args[0].equalsIgnoreCase("--help")) {
-            printHelp();
+//            printHelp();
             return;
         }
 

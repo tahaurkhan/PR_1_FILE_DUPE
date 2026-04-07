@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pr_1_file_dupe.ResultsController">
+
+    <VBox spacing="20"
+          AnchorPane.topAnchor="0"
+          AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0"
+          AnchorPane.rightAnchor="0"
+          styleClass="content-area">
+
+        <padding>
+            <Insets top="20" left="20" right="20" bottom="20"/>
+        </padding>
+
+        <!-- TITLE -->
+        <Label text="Scan Results" styleClass="headline"/>
+
+        <!-- ACTION BAR -->
+        <HBox spacing="10">
+            <Button text="Delete Selected" styleClass="button-primary"/>
+            <Button text="Move Files"/>
+            <Button text="Select All"/>
+            <Button text="Keep One Per Group" onAction="#handleKeepOne"/>
+            <Button text="Delete Selected" onAction="#handleDelete"/>
+        </HBox>
+
+        <!-- TABLE -->
+        
+
+			<TableView fx:id="tableView" VBox.vgrow="ALWAYS">
+
+    <columns>
+
+        <!-- ✅ CHECKBOX -->
+        <TableColumn fx:id="selectCol" text="Select" prefWidth="80"/>
+
+        <!-- ✅ GROUP -->
+        <TableColumn fx:id="groupCol" text="Group" prefWidth="80"/>
+
+        <!-- ✅ OTHER -->
+        <TableColumn fx:id="nameCol" text="File Name" prefWidth="200"/>
+        <TableColumn fx:id="pathCol" text="Path" prefWidth="300"/>
+        <TableColumn fx:id="sizeCol" text="Size (KB)" prefWidth="100"/>
+
+    </columns>
+
+		</TableView>
+
+     
+        <!-- INFO -->
+        
+        <Label text="Select duplicate files to delete or manage."
+               styleClass="subtitle"/>
+
+    </VBox>
+
+</AnchorPane>

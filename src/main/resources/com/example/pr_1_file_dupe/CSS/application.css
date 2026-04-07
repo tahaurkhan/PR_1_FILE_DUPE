@@ -1,6 +1,105 @@
-#filetable{
-    width: 100%;
-    height: 100%;
-    overflow: auto;
+/* Base Styles */
+.root {
+    -fx-font-family: "Inter";
+    -fx-background-color: #f6faf9; /* surface */
+}
 
+.headline {
+    -fx-font-family: "Manrope";
+    -fx-font-weight: bold;
+    -fx-text-fill: #181c1c; /* on-surface */
+}
+/* Sets the default text color for ALL labels in the app */
+.label {
+    -fx-text-fill: #181c1c; 
+}
+
+/* Specific styling for your Manrope headers */
+.headline {
+    -fx-font-family: "Manrope";
+    -fx-font-weight: bold;
+    -fx-text-fill: #181c1c; 
+}
+/* Fix for invisible Radio Button text */
+.radio-button {
+    -fx-text-fill: #181c1c;
+}
+
+/* Optional: Make it slightly larger so it's easier to read */
+.radio-button .text {
+    -fx-font-size: 14px;
+}
+
+.drag-area {
+    -fx-border-color: #006565;
+    -fx-border-style: dashed;
+    -fx-border-radius: 10;
+    -fx-alignment: center;
+}
+
+.drag-area:hover {
+    -fx-background-color: #e0f7f7;
+}
+
+
+
+
+/* For secondary descriptions (like the text under 'Auto-delete empty folders') */
+.text-muted {
+    -fx-text-fill: #3e4949;
+}
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #f0f4f3; /* surface-container-low */
+    -fx-padding: 20;
+}
+
+.nav-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #3e4949; /* on-surface-variant */
+    -fx-padding: 10 15;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.nav-item:hover {
+    -fx-background-color: #ebefee;
+    -fx-text-fill: #006565;
+}
+
+.nav-item-active {
+    -fx-background-color: #ebefee;
+    -fx-text-fill: #006565;
+    -fx-border-color: #006565;
+    -fx-border-width: 0 4 0 0; /* Right accent border */
+}
+
+/* Cards (Bento Grid Style) */
+.card {
+    -fx-background-color: #ffffff; /* surface-container-lowest */
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(24, 28, 28, 0.06), 32, 0, 0, 12);
+    -fx-padding: 20;
+}
+
+/* Buttons */
+.button-primary {
+    -fx-background-color: linear-gradient(to bottom right, #006565, #008080);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+}
+
+.button-primary:hover {
+    -fx-opacity: 0.9;
+}
+
+/* Radio / Inputs */
+.radio-button .radio {
+    -fx-border-color: #006565;
+    -fx-background-color: white;
+}
+.radio-button:selected .dot {
+    -fx-background-color: #006565;
 }

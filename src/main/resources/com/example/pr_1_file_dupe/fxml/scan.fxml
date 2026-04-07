@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="20" 
+xmlns="http://javafx.com/javafx/21" 
+xmlns:fx="http://javafx.com/fxml/1" 
+styleClass="content" 
+	fx:controller="com.example.pr_1_file_dupe.ScanController">
+    <padding>
+        <Insets top="30" left="30" right="30" bottom="30"/>
+    </padding>
+
+    <VBox spacing="5">
+        <Label text="Scan Files" styleClass="headline" />
+        <Label text="Select a folder and start scanning for duplicate files" styleClass="subtitle"/>
+    </VBox>
+
+    <VBox spacing="10" styleClass="card">
+        <Label text="Select Folder" styleClass="section-title"/>
+        <HBox spacing="10">
+            <TextField fx:id="pathField" promptText="Choose folder..." HBox.hgrow="ALWAYS"/>
+            <Button text="Browse" fx:id="browseBtn"/>
+        </HBox>
+        <StackPane styleClass="drag-area" prefHeight="120">
+            <Label text="Drag &amp; Drop Folder Here"/>
+        </StackPane>
+    </VBox>
+
+    <HBox spacing="10">
+        <Button text="Start Scan" styleClass="button-primary" fx:id="startBtn"/>
+        <Button text="Pause" fx:id="pauseBtn"/>
+        <Button text="Cancel" fx:id="cancelBtn"/>
+        <Button text="Skip File" fx:id="skipBtn"/>
+    </HBox>
+
+    <VBox spacing="10" styleClass="card">
+        <Label text="Scanning Progress" styleClass="section-title"/>
+        <ProgressBar fx:id="progressBar" prefWidth="400"/>
+        <Label text="Files scanned: 0" fx:id="filesLabel"/>
+        <Label text="Current file: -" fx:id="currentFileLabel"/>
+        <Label text="Speed: 0 files/sec" fx:id="speedLabel"/>
+        <Label text="Skipped files: 0" fx:id="skipCountLabel"/>
+    </VBox>
+</VBox>
