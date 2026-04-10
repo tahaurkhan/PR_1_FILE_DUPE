@@ -1,48 +1,57 @@
 package com.example.pr_1_file_dupe;
-//
-//public class dupelicateFinder {
-//
-//	public dupelicateFinder() {
-//		// TODO Auto-generated constructor stub
-//	}
-//
-//}
 
-import java.io.File;
-import java.util.*;
+import com.example.pr_1_file_dupe.DataStore;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DuplicateFinder {
 
-    public Map<String, List<FileData>> findDuplicates(List<FileData> files) {
+    public Map<String, List<FileData>> findDuplicates(List<FileData> allFiles) {
+        System.out.println("Starting duplicate analysis...");
 
-        Map<String, List<FileData>> hashMap = new HashMap<>();
+        // 1. Get the user's preferred algorithm from Settings
+        DataStore store = new DataStore();
+        String selectedAlgorithm = store.getHashAlgorithm();
+        System.out.println("Using Algorithm: " + selectedAlgorithm);
 
-        for (FileData fileData : files) {
-
-            File file = new File(fileData.getPath());
-
-            String hash = HashUtil.generateHash(file);
-
-            if (hash == null) continue;
-
-            hashMap.putIfAbsent(hash, new ArrayList<>());
-            hashMap.get(hash).add(fileData);
+        // Step 1: Group by Size (Fast)
+        Map<Long, List<FileData>> sizeMap = new HashMap<>();
+        for (FileData file : allFiles) {
+            sizeMap.computeIfAbsent(file.getSize(), k -> new ArrayList<>()).add(file);
         }
 
-        return hashMap;
-    }
+        // Step 2: Group by Hash (Only for files that share the exact same size)
+        Map<String, List<FileData>> hashMap = new HashMap<>();
+        int hashedCount = 0;
 
-    // Optional: get only duplicates
-    public Map<String, List<FileData>> getOnlyDuplicates(Map<String, List<FileData>> map) {
-
-        Map<String, List<FileData>> duplicates = new HashMap<>();
-
-        for (Map.Entry<String, List<FileData>> entry : map.entrySet()) {
-            if (entry.getValue().size() > 1) {
-                duplicates.put(entry.getKey(), entry.getValue());
+        for (List<FileData> sameSizeFiles : sizeMap.values()) {
+            if (sameSizeFiles.size() > 1)
+            { 
+                for (FileData file : sameSizeFiles) {
+                    try {
+                        // NEW: Pass the algorithm to HashUtil
+                        String hash = HashUtil.getFileChecksum(file.getPath(), selectedAlgorithm);
+                        hashMap.computeIfAbsent(hash, k -> new ArrayList<>()).add(file);
+                        hashedCount++;
+                    } catch (Exception e) {
+                        System.out.println("Skipped unreadable file: " + file.getName());
+                    }
+                }
             }
         }
 
-        return duplicates;
+        // Step 3: Filter out unique files
+        Map<String, List<FileData>> duplicatesOnly = new HashMap<>();
+        for (Map.Entry<String, List<FileData>> entry : hashMap.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                duplicatesOnly.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        System.out.println("Total files hashed: " + hashedCount);
+        return duplicatesOnly;
     }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="20.0" style="-fx-padding: 40px; -fx-background-color: #f8fcfd;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pr_1_file_dupe.CategoriesController">
+    
+    <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Duplicate Space Analysis" />
+    <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="See exactly which types of files are eating up your storage." />
+
+    <VBox alignment="CENTER" style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        <PieChart fx:id="categoryChart" prefHeight="400.0" prefWidth="500.0" title="Wasted Space by Category" />
+    </VBox>
+
+</VBox>

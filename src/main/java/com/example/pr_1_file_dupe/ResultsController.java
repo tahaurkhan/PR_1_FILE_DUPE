@@ -1,103 +1,159 @@
 package com.example.pr_1_file_dupe;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.CheckBoxTreeTableCell;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 public class ResultsController {
 
     @FXML
-    private TableView<FileData> tableView;
-
+    private TreeTableView<FileData> resultsTable;
     @FXML
-    private TableColumn<FileData, String> nameCol;
-
+    private TreeTableColumn<FileData, Boolean> selectColumn;
     @FXML
-    private TableColumn<FileData, String> pathCol;
-
+    private TreeTableColumn<FileData, String> nameColumn;
     @FXML
-    private TableColumn<FileData, Long> sizeCol;
- 
+    private TreeTableColumn<FileData, Long> sizeColumn;
     @FXML
-    private TableColumn<FileData, Boolean> selectCol;
+    private TreeTableColumn<FileData, String> pathColumn;
 
-    @FXML
-    public void initialize() {
+    public void displayResults(Map<String, List<FileData>> duplicates) {
 
-        // ✅ Checkbox column
-        selectCol.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
-        selectCol.setCellFactory(CheckBoxTableCell.forTableColumn(selectCol));
+        // Wire up the standard text columns
+        nameColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
+        sizeColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("size"));
+        pathColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("path"));
 
-        // ✅ Other columns
-        groupCol.setCellValueFactory(new PropertyValueFactory<>("groupId"));
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-        pathCol.setCellValueFactory(new PropertyValueFactory<>("path"));
-        sizeCol.setCellValueFactory(new PropertyValueFactory<>("size"));
+        // Wire up the CheckBox column
+        selectColumn.setCellValueFactory(new TreeItemPropertyValueFactory<>("selected"));
+        selectColumn.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(selectColumn));
 
-        // ✅ Real data from scan
-        tableView.setItems(DataStore.files);
+        TreeItem<FileData> rootNode = new TreeItem<>(new FileData("Root", "", 0, ""));
+        int groupCounter = 1;
+
+        for (Map.Entry<String, List<FileData>> entry : duplicates.entrySet()) {
+            List<FileData> fileList = entry.getValue();
+            long totalSize = fileList.get(0).getSize();
+            long wastedSpace = totalSize * (fileList.size() - 1);
+
+            // Create Group Header
+            FileData groupHeaderData = new FileData("Group " + groupCounter + " (" + fileList.size() + " files)", "Group", totalSize, "Wasted: " + (wastedSpace / 1024) + " KB");
+            TreeItem<FileData> groupNode = new TreeItem<>(groupHeaderData);
+            groupNode.setExpanded(true);
+
+            // Add the actual files
+            boolean isFirst = true;
+            for (FileData file : fileList) {
+                TreeItem<FileData> fileNode = new TreeItem<>(file);
+
+                // Smart Selection: Automatically check the box for everything EXCEPT the very first original file
+                if (!isFirst) {
+                    file.setSelected(true);
+                }
+                isFirst = false;
+
+                groupNode.getChildren().add(fileNode);
+            }
+
+            rootNode.getChildren().add(groupNode);
+            groupCounter++;
+        }
+
+        resultsTable.setRoot(rootNode);
+        resultsTable.setShowRoot(false);
     }
 
-    // 🔥 DELETE FUNCTION
     @FXML
-    private void handleDelete() {
+    public void deleteSelectedFiles() {
+        System.out.println("--- DELETION PROCESS STARTED ---");
 
-        Iterator<FileData> iterator = DataStore.files.iterator();
+        TreeItem<FileData> root = resultsTable.getRoot();
+        if (root == null) {
+            return;
+        }
 
-        while (iterator.hasNext()) {
-            FileData file = iterator.next();
+        java.util.List<TreeItem<FileData>> filesToRemove = new java.util.ArrayList<>();
+        java.util.List<TreeItem<FileData>> emptyGroupsToRemove = new java.util.ArrayList<>();
 
-            if (file.isSelected()) {
+        int deletedCount = 0;
+        long totalDeletedSizeInBytes = 0; // Initialize size tracker
+        java.util.Set<TreeItem<FileData>> affectedGroups = new java.util.HashSet<>(); // Track unique groups
 
-                File f = new File(file.getPath());
+        // 1. Find all checked files
+        for (TreeItem<FileData> group : root.getChildren()) {
+            for (TreeItem<FileData> fileNode : group.getChildren()) {
+                FileData file = fileNode.getValue();
 
-                if (f.exists()) {
-                    f.delete(); // 🔥 delete from system
+                if (file.isSelected() && !file.getType().equals("Group")) {
+                    File target = new File(file.getPath());
+
+                    if (target.exists()) {
+                        long fileSize = target.length(); // Get size before deleting
+                        
+                        boolean success = false;
+                        try {
+                            // NEW: Move to OS Trash/Recycle Bin instead of permanent deletion!
+                            if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.MOVE_TO_TRASH)) {
+                                success = java.awt.Desktop.getDesktop().moveToTrash(target);
+                            } else {
+                                // Fallback to permanent delete if the OS doesn't support Trash
+                                success = target.delete(); 
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Error moving to trash: " + e.getMessage());
+                        }
+
+                        if (success) {
+                            System.out.println("Successfully moved to Trash: " + file.getName());
+                            filesToRemove.add(fileNode);
+
+                            // Update our trackers
+                            totalDeletedSizeInBytes += fileSize;
+                            affectedGroups.add(group);
+                            deletedCount++;
+                        }
+                    }
+                            
+                    } else {
+                        filesToRemove.add(fileNode);
+                    }
                 }
+            }
 
-                iterator.remove(); // remove from UI
+
+        // 2. Remove files from UI
+        for (TreeItem<FileData> node : filesToRemove) {
+            node.getParent().getChildren().remove(node);
+        }
+
+        // 3. Remove empty or single-file groups from UI
+        for (TreeItem<FileData> group : root.getChildren()) {
+            if (group.getChildren().size() <= 1) {
+                emptyGroupsToRemove.add(group);
             }
         }
+        root.getChildren().removeAll(emptyGroupsToRemove);
+
+        System.out.println("Total files permanently deleted: " + deletedCount);
+
+        // 4. Update Persistence Store
+        int deletedGroupsCount = affectedGroups.size();
+        com.example.pr_1_file_dupe.DataStore store = new com.example.pr_1_file_dupe.DataStore();
+        store.updateStats(totalDeletedSizeInBytes, deletedGroupsCount, 0);
+
+        // Show Alert
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("Cleanup Complete");
+        alert.setHeaderText(null);
+        alert.setContentText("Successfully deleted " + deletedCount + " files and reclaimed " + (totalDeletedSizeInBytes / 1024) + " KB!");
+        alert.showAndWait();
     }
     
-
-    		@FXML
-    		private void handleKeepOne() {
-
-    		    Map<Integer, Boolean> groupSeen = new HashMap<>();
-
-    		    Iterator<FileData> iterator = DataStore.files.iterator();
-
-    		    while (iterator.hasNext()) {
-    		        FileData file = iterator.next();
-
-    		        int group = file.getGroup_id();
-
-    		        if (!groupSeen.containsKey(group)) {
-    		            // keep first file
-    		            groupSeen.put(group, true);
-    		        } else {
-    		            // delete others
-    		            File f = new File(file.getPath());
-
-    		            if (f.exists()) {
-    		                f.delete();
-    		            }
-
-    		            iterator.remove();
-    		        }
-    		    }
-    		}
-    	
-
-}
+    }

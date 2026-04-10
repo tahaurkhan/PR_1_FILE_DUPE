@@ -1,38 +1,31 @@
 package com.example.pr_1_file_dupe;
 
-import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class HashUtil {
 
-    public static String generateHash(File file) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
+    // Generates a SHA-256 checksum for a given file
+    public static String getFileChecksum(String filepath , String algorithm) throws IOException, NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-            FileInputStream fis = new FileInputStream(file);
-
-            byte[] byteArray = new byte[1024];
-            int bytesRead;
-
-            while ((bytesRead = fis.read(byteArray)) != -1) {
-                md.update(byteArray, 0, bytesRead);
+        // Read the file in chunks to avoid running out of RAM on large files
+        try (FileInputStream fis = new FileInputStream(filepath)) {
+            byte[] byteArray = new byte[8192]; // 8KB chunks
+            int bytesCount;
+            while ((bytesCount = fis.read(byteArray)) != -1) {
+                digest.update(byteArray, 0, bytesCount);
             }
-            
-            fis.close();
-
-            byte[] hashBytes = md.digest();
-
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-
-            return sb.toString();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
         }
+
+        // Convert the byte array into a readable Hex String
+        byte[] bytes = digest.digest();
+        StringBuilder sb = new StringBuilder();
+        for (byte aByte : bytes) {
+            sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
+        }
+        return sb.toString();
     }
 }

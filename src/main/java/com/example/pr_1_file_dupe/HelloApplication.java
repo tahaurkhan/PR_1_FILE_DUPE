@@ -4,27 +4,20 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
 import java.io.IOException;
 
 public class HelloApplication extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-
-    	
-    	FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/com/example/pr_1_file_dupe/fxml/main.fxml"));
-
+        // 1. Tell it EXACTLY where the file is using an absolute path
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/com/example/pr_1_file_dupe/fxml/main.fxml"));
+        
+        // 2. Load the blank canvas
         Scene scene = new Scene(fxmlLoader.load());
-        String css;
-        css = this.getClass().getResource("/com/example/pr_1_file_dupe/CSS/application.css").toExternalForm();
 
-        if (css == null) {
-            throw new RuntimeException("CSS file not found!");
-        }
-        scene.getStylesheets().add(css);
-
-        stage.setTitle("Hello!");
+        // 3. Set up the window and show it
+        stage.setTitle("Duplicate File Detector");
         stage.setScene(scene);
         stage.show();
     }
