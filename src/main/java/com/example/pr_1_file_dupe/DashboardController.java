@@ -66,8 +66,13 @@ public class DashboardController {
         };
 
         // 3. Define what happens when the background task successfully finishes
+     // 3. Define what happens when the background task successfully finishes
         scanTask.setOnSucceeded(e -> {
             Map<String, List<FileData>> duplicates = scanTask.getValue();
+            
+            // ---> NEW: Get the scanner instance out of the task if possible, 
+            // or just print the map sizes to verify it worked.
+            System.out.println("Scan complete! Handing data to Results Screen...");
             
             try {
                 javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/results.fxml"));
