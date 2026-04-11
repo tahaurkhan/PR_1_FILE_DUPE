@@ -26,6 +26,13 @@
             <Label fx:id="scannedCountLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #e67e22;" text="0" />
         </VBox>
     </HBox>
+    	<HBox alignment="CENTER" spacing="10.0">
+            <TextField fx:id="pathInputField" prefHeight="45.0" prefWidth="450.0" promptText="Select or enter folder path..." style="-fx-background-radius: 10;" />
+            
+            <Button onAction="#browseFolder" prefHeight="45.0" prefWidth="100.0" style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;" text="BROWSE" />
+            
+            <Button fx:id="scanButton" onAction="#startScan" prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: #00e5ff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;" text="START SCAN" />
+        </HBox>
 
     <VBox alignment="CENTER" spacing="15" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15;">
         <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Ready for a new scan?" />

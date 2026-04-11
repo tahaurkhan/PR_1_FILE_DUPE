@@ -8,7 +8,7 @@ import java.util.List;
 
 public class FileScanner {
 
-    // NEW: Variable to track skipped files
+    // Variable to track skipped files
     private int skippedCount = 0;
 
     public List<FileData> scanDirectory(String path) {
@@ -35,7 +35,6 @@ public class FileScanner {
         return fileList;
     }
 
-    // NEW: A dedicated recursive method that runs much faster
     private void scanRecursive(File folder, List<FileData> fileList, boolean skipHidden, long minSizeInBytes) {
         File[] files = folder.listFiles();
         
@@ -72,8 +71,60 @@ public class FileScanner {
             }
         }
     }
+ // UPGRADED: Crash-proof recursive scanner
+    private void scanRecursive1(File folder, List<FileData> fileList, boolean skipHidden, long minSizeInBytes) {
+        try {
+            // NEW DEFENSE 1: Prevent infinite loops from Linux Symlinks
+            if (java.nio.file.Files.isSymbolicLink(folder.toPath())) {
+                skippedCount++;
+                return;
+            }
 
-    // NEW: Getter so other parts of the app can see the skipped count
+            File[] files = folder.listFiles();
+            
+            // NEW DEFENSE 2: If files is null, the OS blocked us (Permission Denied)
+            if (files == null) {
+                skippedCount++;
+                return;
+            }
+
+            for (File file : files) {
+                try {
+                    // Rule 1: Skip hidden files
+                    if (skipHidden && file.isHidden()) {
+                        skippedCount++;
+                        continue; 
+                    }
+
+                    if (file.isDirectory()) {
+                        // Dive into the next folder
+                        scanRecursive(file, fileList, skipHidden, minSizeInBytes);
+                    } else {
+                        long size = file.length();
+                        
+                        // Rule 2: Skip files smaller than minimum limit
+                        if (size < minSizeInBytes) {
+                            skippedCount++;
+                            continue;
+                        }
+
+                        String name = file.getName();
+                        String fullPath = file.getAbsolutePath();
+                        String type = getFileExtension(name);
+
+                        fileList.add(new FileData(name, type, size, fullPath));
+                    }
+                // NEW DEFENSE 3: Catch any file-specific security lockouts
+                } catch (SecurityException se) {
+                    skippedCount++;
+                }
+            }
+        // NEW DEFENSE 4: Catch any catastrophic folder read errors so the survives
+        } catch (Exception e) {
+            System.out.println("Skipped unreadable system folder: " + folder.getAbsolutePath());
+            skippedCount++;
+        }
+    }
     public int getSkippedCount() {
         return skippedCount;
     }
@@ -85,4 +136,4 @@ public class FileScanner {
         }
         return fileName.substring(lastDotIndex + 1);
     }
-}s
+} 

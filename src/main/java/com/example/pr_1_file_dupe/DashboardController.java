@@ -22,7 +22,11 @@ public class DashboardController {
     @FXML private Label groupsFoundLabel;
     @FXML private Label scannedCountLabel;
     // Connects to our new loading UI
+ // NEW: A temporary storage for our last scan so other screens can see it
     
+    
+    
+    public static java.util.Map<String, java.util.List<com.example.pr_1_file_dupe.FileData>> lastScanResults;
     @FXML
     public void initialize() {
         DataStore store = new DataStore();
@@ -37,7 +41,25 @@ public class DashboardController {
         groupsFoundLabel.setText(store.getTotalGroups());
         scannedCountLabel.setText(store.getTotalScanned());
     }
+ // NEW: Method to open the OS File Browser
+    @FXML
+    public void browseFolder() {
+        // 1. Create the JavaFX Directory Chooser
+        javafx.stage.DirectoryChooser directoryChooser = new javafx.stage.DirectoryChooser();
+        directoryChooser.setTitle("Select Folder to Scan");
+        
+        // Optional: Set default starting location to user's home directory
+        directoryChooser.setInitialDirectory(new java.io.File(System.getProperty("user.home")));
 
+        // 2. Open the window and wait for the user to select something
+        javafx.stage.Window stage = pathInputField.getScene().getWindow();
+        java.io.File selectedDirectory = directoryChooser.showDialog(stage);
+
+        // 3. If they picked a folder (and didn't click cancel), put the path in the text box
+        if (selectedDirectory != null) {
+            pathInputField.setText(selectedDirectory.getAbsolutePath());
+        }
+    }
     @FXML
     public void startScan(ActionEvent event) {
         String targetFolder = pathInputField.getText();
@@ -64,7 +86,7 @@ public class DashboardController {
                 return finder.findDuplicates(scannedFiles);
             }
         };
-
+      
         // 3. Define what happens when the background task successfully finishes
      // 3. Define what happens when the background task successfully finishes
         scanTask.setOnSucceeded(e -> {

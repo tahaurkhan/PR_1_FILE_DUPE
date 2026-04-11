@@ -1,5 +1,6 @@
 package com.example.pr_1_file_dupe;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -28,4 +29,12 @@ public class HashUtil {
         }
         return sb.toString();
     }
+
+//	public static String generateHash(File f) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+    
+    
+    
 }

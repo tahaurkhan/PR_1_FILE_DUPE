@@ -23,8 +23,12 @@ public class CategoriesController {
         for (List<FileData> fileList : duplicates.values()) {
             if (fileList.size() <= 1) continue;
 
-            // Wasted space = size of file * (number of copies - 1)
             long wastedSpace = fileList.get(0).getSize() * (fileList.size() - 1);
+            
+            // FALLBACK: If it's a completely empty dummy file (0 bytes), pretend it's 1 byte 
+            // so it still shows up on our chart for testing purposes!
+            if (wastedSpace == 0) wastedSpace = 1; 
+
             String type = fileList.get(0).getType().toLowerCase();
 
             switch (type) {
@@ -43,19 +47,26 @@ public class CategoriesController {
             }
         }
 
-        // 2. Convert bytes to Megabytes (MB) for cleaner chart numbers
-        double imgMB = imageSpace / (1024.0 * 1024.0);
-        double vidMB = videoSpace / (1024.0 * 1024.0);
-        double docMB = documentSpace / (1024.0 * 1024.0);
-        double othMB = otherSpace / (1024.0 * 1024.0);
+        // 2. Convert to KB for the labels (so small text files show up as 1.5 KB instead of 0.0 MB)
+        double imgKB = imageSpace / 1024.0;
+        double vidKB = videoSpace / 1024.0;
+        double docKB = documentSpace / 1024.0;
+        double othKB = otherSpace / 1024.0;
 
-        // 3. Populate the Pie Chart
+        // 3. Populate the Pie Chart using the raw byte counts for accurate slice proportions
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
         
-        if (imgMB > 0) pieChartData.add(new PieChart.Data("Images (" + String.format("%.1f", imgMB) + " MB)", imgMB));
-        if (vidMB > 0) pieChartData.add(new PieChart.Data("Videos (" + String.format("%.1f", vidMB) + " MB)", vidMB));
-        if (docMB > 0) pieChartData.add(new PieChart.Data("Documents (" + String.format("%.1f", docMB) + " MB)", docMB));
-        if (othMB > 0) pieChartData.add(new PieChart.Data("Others (" + String.format("%.1f", othMB) + " MB)", othMB));
+        if (imageSpace > 0) pieChartData.add(new PieChart.Data("Images (" + String.format("%.1f", imgKB) + " KB)", imageSpace));
+        if (videoSpace > 0) pieChartData.add(new PieChart.Data("Videos (" + String.format("%.1f", vidKB) + " KB)", videoSpace));
+        if (documentSpace > 0) pieChartData.add(new PieChart.Data("Documents (" + String.format("%.1f", docKB) + " KB)", documentSpace));
+        if (otherSpace > 0) pieChartData.add(new PieChart.Data("Others (" + String.format("%.1f", othKB) + " KB)", otherSpace));
+
+        // 4. Safety Check: If no duplicates were found at all
+        if (pieChartData.isEmpty()) {
+            categoryChart.setTitle("No duplicates found to chart!");
+        } else {
+            categoryChart.setTitle("Wasted Space by Category");
+        }
 
         categoryChart.setData(pieChartData);
     }
