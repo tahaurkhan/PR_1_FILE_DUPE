@@ -1,105 +1,543 @@
-/* Base Styles */
+/* ============================================================
+   COLOR TOKENS — change these 5 values to retheme the whole app
+   ============================================================ */
 .root {
-    -fx-font-family: "Inter";
-    -fx-background-color: #f6faf9; /* surface */
-}
+    -primary:        #006565;
+    -primary-light:  #e0f4f4;
+    -primary-dark:   #004444;
+    -surface:        #f8fcfd;
+    -surface-card:   #ffffff;
+    -surface-side:   #f0f4f3;
+    -on-surface:     #1a2424;
+    -on-muted:       #6b7c7c;
+    -danger:         #e74c3c;
+    -warning:        #e67e22;
+    -success:        #27ae60;
+    -info:           #2980b9;
 
-.headline {
-    -fx-font-family: "Manrope";
-    -fx-font-weight: bold;
-    -fx-text-fill: #181c1c; /* on-surface */
-}
-/* Sets the default text color for ALL labels in the app */
-.label {
-    -fx-text-fill: #181c1c; 
-}
-
-/* Specific styling for your Manrope headers */
-.headline {
-    -fx-font-family: "Manrope";
-    -fx-font-weight: bold;
-    -fx-text-fill: #181c1c; 
-}
-/* Fix for invisible Radio Button text */
-.radio-button {
-    -fx-text-fill: #181c1c;
-}
-
-/* Optional: Make it slightly larger so it's easier to read */
-.radio-button .text {
+    -fx-background-color: -surface;
+    -fx-font-family: "Segoe UI", "Ubuntu", "Helvetica Neue", sans-serif;
     -fx-font-size: 14px;
 }
 
-.drag-area {
-    -fx-border-color: #006565;
-    -fx-border-style: dashed;
-    -fx-border-radius: 10;
-    -fx-alignment: center;
+/* ============================================================
+   GLOBAL DEFAULTS
+   ============================================================ */
+.label {
+    -fx-text-fill: -on-surface;
 }
 
-.drag-area:hover {
-    -fx-background-color: #e0f7f7;
-}
-
-
-
-
-/* For secondary descriptions (like the text under 'Auto-delete empty folders') */
 .text-muted {
-    -fx-text-fill: #3e4949;
-}
-/* Sidebar */
-.sidebar {
-    -fx-background-color: #f0f4f3; /* surface-container-low */
-    -fx-padding: 20;
+    -fx-text-fill: -on-muted;
+    -fx-font-size: 12px;
 }
 
+.headline {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -on-surface;
+}
+
+.subheadline {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -on-surface;
+}
+
+/* ============================================================
+   SIDEBAR NAVIGATION
+   ============================================================ */
+.sidebar {
+    -fx-background-color: -surface-side;
+    -fx-padding: 20 12 20 12;
+    -fx-pref-width: 160px;
+}
+
+/* Base nav button */
 .nav-item {
     -fx-background-color: transparent;
-    -fx-text-fill: #3e4949; /* on-surface-variant */
-    -fx-padding: 10 15;
-    -fx-background-radius: 8;
+    -fx-text-fill: -on-muted;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 16;
+    -fx-background-radius: 10;
     -fx-cursor: hand;
+    -fx-pref-width: infinity;
+    -fx-min-width: 130px;
 }
 
 .nav-item:hover {
-    -fx-background-color: #ebefee;
-    -fx-text-fill: #006565;
+    -fx-background-color: -primary-light;
+    -fx-text-fill: -primary;
 }
 
+/* Active state — solid left accent bar using inner shadow trick */
 .nav-item-active {
-    -fx-background-color: #ebefee;
-    -fx-text-fill: #006565;
-    -fx-border-color: #006565;
-    -fx-border-width: 0 4 0 0; /* Right accent border */
+    -fx-background-color: -primary-light;
+    -fx-text-fill: -primary;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent transparent transparent -primary;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-radius: 0 0 0 0;
+    -fx-padding: 10 16 10 12;
 }
 
-/* Cards (Bento Grid Style) */
+/* ============================================================
+   CARDS
+   ============================================================ */
 .card {
-    -fx-background-color: #ffffff; /* surface-container-lowest */
-    -fx-background-radius: 12;
-    -fx-effect: dropshadow(three-pass-box, rgba(24, 28, 28, 0.06), 32, 0, 0, 12);
+    -fx-background-color: -surface-card;
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 70, 70, 0.08), 12, 0, 0, 4);
     -fx-padding: 20;
 }
 
-/* Buttons */
+.card-sm {
+    -fx-background-color: -surface-card;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 70, 70, 0.07), 8, 0, 0, 3);
+    -fx-padding: 14;
+}
+
+/* Stat card used in Dashboard and Recovery */
+.stat-card {
+    -fx-background-color: -surface-card;
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 70, 70, 0.08), 10, 0, 0, 4);
+    -fx-padding: 16 20;
+    -fx-alignment: CENTER;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+/* Primary — teal fill */
 .button-primary {
-    -fx-background-color: linear-gradient(to bottom right, #006565, #008080);
+    -fx-background-color: -primary;
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-background-radius: 8;
-    -fx-padding: 10 20;
+    -fx-font-size: 14px;
+    -fx-background-radius: 10;
+    -fx-padding: 10 24;
+    -fx-cursor: hand;
 }
 
 .button-primary:hover {
-    -fx-opacity: 0.9;
+    -fx-background-color: -primary-dark;
 }
 
-/* Radio / Inputs */
-.radio-button .radio {
-    -fx-border-color: #006565;
+.button-primary:pressed {
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}
+
+/* Danger — red fill */
+.button-danger {
+    -fx-background-color: -danger;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 10;
+    -fx-padding: 10 24;
+    -fx-cursor: hand;
+}
+
+.button-danger:hover {
+    -fx-background-color: #c0392b;
+}
+
+.button-danger:pressed {
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}
+
+/* Ghost — subtle grey outline */
+.button-ghost {
+    -fx-background-color: #ecf0f1;
+    -fx-text-fill: -on-surface;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.button-ghost:hover {
+    -fx-background-color: #dde4e4;
+}
+
+/* Info — blue */
+.button-info {
+    -fx-background-color: -info;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.button-info:hover {
+    -fx-background-color: #1f6391;
+}
+
+/* ============================================================
+   TOGGLE BUTTONS  (filter bar in Duplicates screen)
+   ============================================================ */
+.toggle-filter {
+    -fx-background-color: #ecf0f1;
+    -fx-text-fill: -on-muted;
+    -fx-background-radius: 20;
+    -fx-padding: 5 14;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.toggle-filter:hover {
+    -fx-background-color: -primary-light;
+    -fx-text-fill: -primary;
+}
+
+.toggle-filter:selected {
+    -fx-background-color: -primary;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Default JavaFX ToggleButton fallback */
+.toggle-button:selected {
+    -fx-background-color: -primary;
+    -fx-text-fill: white;
+}
+
+/* ============================================================
+   TEXT FIELD & TEXT AREA
+   ============================================================ */
+.text-field,
+.text-area {
+    -fx-background-color: white;
+    -fx-border-color: #ced6d6;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: -on-surface;
+    -fx-prompt-text-fill: -on-muted;
+}
+
+.text-field:focused,
+.text-area:focused {
+    -fx-border-color: -primary;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 101, 101, 0.2), 6, 0, 0, 0);
+}
+
+/* ============================================================
+   COMBO BOX / DROPDOWN
+   ============================================================ */
+.combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #ced6d6;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 13px;
+}
+
+.combo-box:focused {
+    -fx-border-color: -primary;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: -on-surface;
+    -fx-background-color: transparent;
+    -fx-padding: 4 8;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-border-color: #ced6d6;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.12), 10, 0, 0, 4);
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: -primary-light;
+    -fx-text-fill: -primary;
+}
+
+.combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: -primary;
+    -fx-text-fill: white;
+}
+
+/* ============================================================
+   CHECKBOX
+   ============================================================ */
+.check-box {
+    -fx-text-fill: -on-surface;
+    -fx-font-size: 14px;
+}
+
+.check-box .box {
+    -fx-background-color: white;
+    -fx-border-color: #ced6d6;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -primary;
+    -fx-border-color: -primary;
+}
+
+.check-box:selected .mark {
     -fx-background-color: white;
 }
+
+.check-box:hover .box {
+    -fx-border-color: -primary;
+}
+
+/* ============================================================
+   RADIO BUTTON
+   ============================================================ */
+.radio-button {
+    -fx-text-fill: -on-surface;
+    -fx-font-size: 14px;
+}
+
+.radio-button .radio {
+    -fx-border-color: -primary;
+    -fx-background-color: white;
+}
+
 .radio-button:selected .dot {
-    -fx-background-color: #006565;
+    -fx-background-color: -primary;
+}
+
+/* ============================================================
+   TREE TABLE VIEW  (Results + Duplicates screens)
+   ============================================================ */
+.tree-table-view {
+    -fx-background-color: -surface-card;
+    -fx-border-color: transparent;
+    -fx-table-cell-border-color: transparent;
+}
+
+/* Column headers */
+.tree-table-view .column-header {
+    -fx-background-color: #f0f4f3;
+    -fx-border-color: transparent transparent #e0eaea transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 12;
+}
+
+.tree-table-view .column-header .label {
+    -fx-text-fill: -on-muted;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.tree-table-view .column-header-background {
+    -fx-background-color: #f0f4f3;
+}
+
+/* Rows */
+.tree-table-row-cell {
+    -fx-background-color: -surface-card;
+    -fx-border-color: transparent transparent #f0f4f3 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 4 0;
+}
+
+.tree-table-row-cell:odd {
+    -fx-background-color: #fafcfc;
+}
+
+.tree-table-row-cell:hover {
+    -fx-background-color: -primary-light;
+}
+
+.tree-table-row-cell:selected {
+    -fx-background-color: #d0edee;
+    -fx-text-fill: -on-surface;
+}
+
+.tree-table-row-cell .tree-table-cell {
+    -fx-text-fill: -on-surface;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 6 12;
+}
+
+/* Group header rows — slightly different look */
+.tree-table-row-cell:expanded {
+    -fx-background-color: #eef6f6;
+    -fx-font-weight: bold;
+}
+
+/* ============================================================
+   TABLE VIEW  (Recovery screen log table)
+   ============================================================ */
+.table-view {
+    -fx-background-color: -surface-card;
+    -fx-border-color: transparent;
+    -fx-table-cell-border-color: transparent;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f0f4f3;
+    -fx-border-color: transparent transparent #e0eaea transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 12;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -on-muted;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f0f4f3;
+}
+
+.table-row-cell {
+    -fx-background-color: -surface-card;
+    -fx-border-color: transparent transparent #f0f4f3 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #fafcfc;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: -primary-light;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #d0edee;
+}
+
+.table-row-cell .table-cell {
+    -fx-text-fill: -on-surface;
+    -fx-padding: 8 12;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Empty table placeholder */
+.table-view .placeholder .label,
+.tree-table-view .placeholder .label {
+    -fx-text-fill: -on-muted;
+    -fx-font-size: 14px;
+}
+
+/* ============================================================
+   SCROLL BAR  (slim modern style)
+   ============================================================ */
+.scroll-bar {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+    -fx-pref-height: 8px;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #ced6d6;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: -on-muted;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+}
+
+/* ============================================================
+   PROGRESS INDICATOR  (loading spinner on Dashboard)
+   ============================================================ */
+.progress-indicator {
+    -fx-progress-color: -primary;
+    -fx-accent: -primary;
+}
+
+.progress-indicator .percentage {
+    -fx-fill: -on-surface;
+}
+
+/* ============================================================
+   DRAG / DROP AREA  (if used)
+   ============================================================ */
+.drag-area {
+    -fx-border-color: -primary;
+    -fx-border-style: dashed;
+    -fx-border-radius: 12;
+    -fx-border-width: 2;
+    -fx-background-radius: 12;
+    -fx-alignment: center;
+    -fx-padding: 30;
+}
+
+.drag-area:hover {
+    -fx-background-color: -primary-light;
+}
+
+/* ============================================================
+   PIE CHART  (Categories screen)
+   ============================================================ */
+.chart {
+    -fx-background-color: transparent;
+    -fx-padding: 10;
+}
+
+.chart-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -on-surface;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+.chart-legend-item {
+    -fx-text-fill: -on-surface;
+    -fx-font-size: 12px;
+}
+
+/* Pie slice colors */
+.default-color0.chart-pie { -fx-pie-color: #006565; }
+.default-color1.chart-pie { -fx-pie-color: #e67e22; }
+.default-color2.chart-pie { -fx-pie-color: #2980b9; }
+.default-color3.chart-pie { -fx-pie-color: #8e44ad; }
+.default-color4.chart-pie { -fx-pie-color: #27ae60; }
+
+/* ============================================================
+   SEPARATOR
+   ============================================================ */
+.separator .line {
+    -fx-border-color: #e0eaea;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ============================================================
+   TIPS / INFO PANEL  (Recovery screen)
+   ============================================================ */
+.tip-panel {
+    -fx-background-color: #eafaf1;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+}
+
+.tip-panel .label {
+    -fx-text-fill: #1e8449;
 }

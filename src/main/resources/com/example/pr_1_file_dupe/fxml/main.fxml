@@ -6,19 +6,21 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<BorderPane fx:id="mainLayout" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pr_1_file_dupe.MainController">
+<BorderPane  stylesheets="@../CSS/application.css" fx:id="mainLayout" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pr_1_file_dupe.MainController">
    
    <left>
-      <VBox spacing="15.0" style="-fx-background-color: #f4f4f4;" BorderPane.alignment="CENTER">
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
-         <Button maxWidth="1.7976931348623157E308" onAction="#showFiles" text="Files" />
-         <Button maxWidth="1.7976931348623157E308" onAction="#showDuplicates" text="Duplicates" />
-         <Button maxWidth="1.7976931348623157E308" onAction="#showCategories" text="Categories" />
-         <Button maxWidth="1.7976931348623157E308" onAction="#showRecovery" text="Recovery" />
-		 <Button text="Settings" onAction="#openSettings" prefWidth="100.0" />
-      </VBox>
+      <VBox spacing="8" styleClass="sidebar" BorderPane.alignment="CENTER">
+    <Button maxWidth="Infinity" onAction="#showFiles"
+            styleClass="nav-item" text="🗂  Files" />
+    <Button maxWidth="Infinity" onAction="#showDuplicates"
+            styleClass="nav-item" text="🔁  Duplicates" />
+    <Button maxWidth="Infinity" onAction="#showCategories"
+            styleClass="nav-item" text="📊  Categories" />
+    <Button maxWidth="Infinity" onAction="#showRecovery"
+            styleClass="nav-item" text="♻  Recovery" />
+    <Button maxWidth="Infinity" onAction="#openSettings"
+            styleClass="nav-item" text="⚙  Settings" />
+</VBox>
    </left>
 
    <center>

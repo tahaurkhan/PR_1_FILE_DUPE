@@ -4,11 +4,13 @@ import com.example.pr_1_file_dupe.service.FileScanner;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Labeled;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
@@ -17,119 +19,112 @@ import java.util.Map;
 public class DashboardController {
 
     @FXML private TextField pathInputField;
-    @FXML private Button scanButton;
-    @FXML private VBox loadingBox;
-    @FXML private Label totalSavedLabel;
-    @FXML private Label groupsFoundLabel;
-    @FXML private Label scannedCountLabel;
-    // Connects to our new loading UI
- // NEW: A temporary storage for our last scan so other screens can see it
-    
-    
-    
-    public static java.util.Map<String, java.util.List<com.example.pr_1_file_dupe.FileData>> lastScanResults;
+    @FXML private Button    scanButton;
+    @FXML private VBox      loadingBox;
+    @FXML private Label     totalSavedLabel;
+    @FXML private Label     groupsFoundLabel;
+    @FXML private Label     scannedCountLabel;
+
+    public static Map<String, List<FileData>> lastScanResults;
+
     @FXML
     public void initialize() {
+        // ✅ No ToggleGroup here — that belongs in DuplicatesController
         DataStore store = new DataStore();
-        
-        // Convert bytes to a readable format (KB/MB)
+
         long savedBytes = Long.parseLong(store.getTotalSaved());
-        String formattedSize = (savedBytes > 1024 * 1024) 
-            ? (savedBytes / (1024 * 1024)) + " MB" 
-            : (savedBytes / 1024) + " KB";
+        String formattedSize = (savedBytes >= 1024L * 1024 * 1024)
+                ? String.format("%.1f GB", savedBytes / (1024.0 * 1024 * 1024))
+                : (savedBytes >= 1024 * 1024)
+                ? String.format("%.1f MB", savedBytes / (1024.0 * 1024))
+                : String.format("%.1f KB", savedBytes / 1024.0);
 
         totalSavedLabel.setText(formattedSize);
         groupsFoundLabel.setText(store.getTotalGroups());
         scannedCountLabel.setText(store.getTotalScanned());
     }
- // NEW: Method to open the OS File Browser
+
     @FXML
     public void browseFolder() {
-        // 1. Create the JavaFX Directory Chooser
-        javafx.stage.DirectoryChooser directoryChooser = new javafx.stage.DirectoryChooser();
-        directoryChooser.setTitle("Select Folder to Scan");
-        
-        // Optional: Set default starting location to user's home directory
-        directoryChooser.setInitialDirectory(new java.io.File(System.getProperty("user.home")));
+        javafx.stage.DirectoryChooser chooser = new javafx.stage.DirectoryChooser();
+        chooser.setTitle("Select Folder to Scan");
+        chooser.setInitialDirectory(new java.io.File(System.getProperty("user.home")));
 
-        // 2. Open the window and wait for the user to select something
-        javafx.stage.Window stage = pathInputField.getScene().getWindow();
-        java.io.File selectedDirectory = directoryChooser.showDialog(stage);
-
-        // 3. If they picked a folder (and didn't click cancel), put the path in the text box
-        if (selectedDirectory != null) {
-            pathInputField.setText(selectedDirectory.getAbsolutePath());
+        java.io.File selected = chooser.showDialog(pathInputField.getScene().getWindow());
+        if (selected != null) {
+            pathInputField.setText(selected.getAbsolutePath());
         }
     }
+
     @FXML
     public void startScan(ActionEvent event) {
         String targetFolder = pathInputField.getText();
 
         if (targetFolder == null || targetFolder.trim().isEmpty()) {
-            System.out.println("Please enter a valid path!");
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Path");
+            alert.setHeaderText(null);
+            alert.setContentText("Please enter or browse a folder path first.");
+            alert.showAndWait();
             return;
         }
-        
-        // 1. Show the loading animation and disable the button so the user doesn't click it twice
+
         loadingBox.setVisible(true);
         scanButton.setDisable(true);
         System.out.println("Initializing scanner for: " + targetFolder);
 
-        // 2. Create the Background Task
         Task<Map<String, List<FileData>>> scanTask = new Task<>() {
             @Override
             protected Map<String, List<FileData>> call() throws Exception {
-                // Everything in here runs on a separate invisible thread!
                 FileScanner scanner = new FileScanner();
                 List<FileData> scannedFiles = scanner.scanDirectory(targetFolder);
-
-                DuplicateFinder finder = new DuplicateFinder();
-                return finder.findDuplicates(scannedFiles);
+                return new DuplicateFinder().findDuplicates(scannedFiles);
             }
         };
-      
-        // 3. Define what happens when the background task successfully finishes
-     // 3. Define what happens when the background task successfully finishes
+
         scanTask.setOnSucceeded(e -> {
             Map<String, List<FileData>> duplicates = scanTask.getValue();
-            DashboardController.lastScanResults = duplicates;
-            // ---> NEW: Get the scanner instance out of the task if possible, 
-            // or just print the map sizes to verify it worked.
-            System.out.println("Scan complete! Handing data to Results Screen...");
-            
+            lastScanResults = duplicates;
+
+            // ✅ Save real scanned file count
+            int totalFiles = duplicates.values().stream()
+                    .mapToInt(List::size).sum();
+            new DataStore().updateStats(0, duplicates.size(), totalFiles);
+
+            // ✅ Refresh stat cards immediately
+            initialize();
+
+            loadingBox.setVisible(false);
+            scanButton.setDisable(false);
+
             try {
-                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/results.fxml"));
-                javafx.scene.Parent resultsScreen = loader.load();
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                        "/com/example/pr_1_file_dupe/fxml/results.fxml"));
+                Parent resultsScreen = loader.load();
 
                 ResultsController controller = loader.getController();
                 controller.displayResults(duplicates);
 
-                // Swap the screen
-                javafx.scene.layout.BorderPane mainLayout = (javafx.scene.layout.BorderPane) pathInputField.getScene().getRoot();
+                BorderPane mainLayout =
+                        (BorderPane) pathInputField.getScene().getRoot();
                 mainLayout.setCenter(resultsScreen);
 
             } catch (Exception ex) {
                 ex.printStackTrace();
-                System.out.println("Error loading results screen!");
+                new Alert(Alert.AlertType.ERROR, "Could not load results: "
+                        + ex.getMessage()).showAndWait();
             }
         });
-        
+
         scanTask.setOnFailed(e -> {
             loadingBox.setVisible(false);
             scanButton.setDisable(false);
-            System.out.println("Scan failed: " + scanTask.getException().getMessage());
-
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Scan Failed");
-            alert.setHeaderText(null);
-            alert.setContentText("Could not complete scan: "
-                    + scanTask.getException().getMessage());
-            alert.showAndWait();
+            new Alert(Alert.AlertType.ERROR, "Scan failed: "
+                    + scanTask.getException().getMessage()).showAndWait();
         });
-        
-        // 4. Start the Background Thread
-        Thread backgroundThread = new Thread(scanTask);
-        backgroundThread.setDaemon(true); // Ensures the background thread dies gracefully if the user closes the app
-        backgroundThread.start();
+
+        Thread t = new Thread(scanTask);
+        t.setDaemon(true);
+        t.start();
     }
 }

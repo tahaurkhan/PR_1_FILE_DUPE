@@ -3,6 +3,7 @@ module com.example.pr_1_file_dupe {
     requires javafx.fxml;
     requires java.desktop;
     requires javafx.base;
+	requires javafx.graphics;
 
     // GUI controllers
     opens com.example.pr_1_file_dupe to javafx.fxml;
