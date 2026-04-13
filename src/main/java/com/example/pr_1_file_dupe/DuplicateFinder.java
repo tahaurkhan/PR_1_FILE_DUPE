@@ -54,4 +54,17 @@ public class DuplicateFinder {
         System.out.println("Total files hashed: " + hashedCount);
         return duplicatesOnly;
     }
+    public Map<String, List<FileData>> getOnlyDuplicates(
+            Map<String, List<FileData>> allResults) {
+
+        Map<String, List<FileData>> duplicatesOnly = new HashMap<>();
+
+        for (Map.Entry<String, List<FileData>> entry : allResults.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                duplicatesOnly.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return duplicatesOnly;
+    }
 }

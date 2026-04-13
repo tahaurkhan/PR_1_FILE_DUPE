@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="24" style="-fx-padding: 36; -fx-background-color: #f8fcfd;"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pr_1_file_dupe.RecoveryController">
+
+    <!-- Header -->
+    <VBox spacing="4">
+        <Label style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"
+               text="Recovery &amp; History" />
+        <Label style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;"
+               text="Track space reclaimed and manage files you have cleaned up." />
+    </VBox>
+
+    <!-- Stat Cards -->
+    <HBox spacing="16">
+        <VBox alignment="CENTER" prefHeight="110" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: white; -fx-background-radius: 14;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+            <Label style="-fx-font-size: 32px;" text="💾" />
+            <Label fx:id="spaceSavedLabel"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #00bcd4;"
+                   text="0 MB" />
+            <Label style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" text="Total Space Reclaimed" />
+        </VBox>
+
+        <VBox alignment="CENTER" prefHeight="110" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: white; -fx-background-radius: 14;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+            <Label style="-fx-font-size: 32px;" text="🗑" />
+            <Label fx:id="filesDeletedLabel"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"
+                   text="0" />
+            <Label style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" text="Groups Cleaned" />
+        </VBox>
+
+        <VBox alignment="CENTER" prefHeight="110" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: white; -fx-background-radius: 14;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+            <Label style="-fx-font-size: 32px;" text="🔎" />
+            <Label fx:id="scansRunLabel"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #9b59b6;"
+                   text="0" />
+            <Label style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" text="Total Files Scanned" />
+        </VBox>
+    </HBox>
+
+    <!-- Deletion Log -->
+    <VBox spacing="10"
+          style="-fx-background-color: white; -fx-background-radius: 14; -fx-padding: 20;
+                 -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.07), 10, 0, 0, 4);">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"
+                   text="Session Deletion Log" />
+            <HBox HBox.hgrow="ALWAYS" />
+            <Button onAction="#clearLog"
+                    style="-fx-background-color: #ecf0f1; -fx-text-fill: #7f8c8d;
+                           -fx-background-radius: 6; -fx-font-size: 12px; -fx-padding: 5 12;"
+                    text="Clear Log" />
+        </HBox>
+
+        <TableView fx:id="logTable" prefHeight="200" style="-fx-border-color: transparent;">
+            <columns>
+                <TableColumn fx:id="logTimeCol"  prefWidth="130" text="Time" />
+                <TableColumn fx:id="logNameCol"  prefWidth="260" text="File Name" />
+                <TableColumn fx:id="logSizeCol"  prefWidth="100" text="Size" />
+                <TableColumn fx:id="logPathCol"  prefWidth="300" text="Original Path" />
+            </columns>
+            <placeholder>
+                <Label style="-fx-text-fill: #bdc3c7; -fx-font-size: 13px;"
+                       text="No files have been deleted this session." />
+            </placeholder>
+        </TableView>
+    </VBox>
+
+    <!-- Actions -->
+    <HBox spacing="14">
+        <Button onAction="#openTrash" prefHeight="44" HBox.hgrow="ALWAYS"
+                maxWidth="1.7976931348623157E308"
+                style="-fx-background-color: #3498db; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-background-radius: 10; -fx-font-size: 13px;"
+                text="📂  Open Trash / Recycle Bin" />
+        <Button onAction="#resetStats" prefHeight="44" HBox.hgrow="ALWAYS"
+                maxWidth="1.7976931348623157E308"
+                style="-fx-background-color: #ecf0f1; -fx-text-fill: #e74c3c;
+                       -fx-font-weight: bold; -fx-background-radius: 10; -fx-font-size: 13px;"
+                text="⚠  Reset All Statistics" />
+    </HBox>
+
+    <!-- Tips panel -->
+    <VBox spacing="8"
+          style="-fx-background-color: #eafaf1; -fx-background-radius: 12; -fx-padding: 16;">
+        <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e8449;"
+               text="💡 Recovery Tips" />
+        <Label wrapText="true"
+               style="-fx-text-fill: #1e8449; -fx-font-size: 12px;"
+               text="• Files are moved to your OS Trash — not permanently deleted. You can restore them from there." />
+        <Label wrapText="true"
+               style="-fx-text-fill: #1e8449; -fx-font-size: 12px;"
+               text="• Always keep the original copy in its primary location and delete the duplicate." />
+        <Label wrapText="true"
+               style="-fx-text-fill: #1e8449; -fx-font-size: 12px;"
+               text="• Run a scan again after cleanup to verify everything looks clean." />
+    </VBox>
+
+</VBox>

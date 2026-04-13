@@ -18,29 +18,29 @@ public class _check_fileScanner {
 //		***************insert all file in List*************************
 		
 		
-		FileScanner scanner = new FileScanner();
-		List<FileData> files = scanner.scanDirectory("/home/tahaur/Downloads");
-		double dupe_file_count =0;
-//		for (FileData f : files) {
-//		    System.out.println(file_count++ + f.getPath());
-//		}
-//		System.out.println("Program is running ......!");
+//		FileScanner scanner = new FileScanner();
+//		List<FileData> files = scanner.scanDirectory("/home/tahaur /Downloads");
+//		double dupe_file_count =0;
+////		for (FileData f : files) {
+////		    System.out.println(file_count++ + f.getPath());
+////		}
+////		System.out.println("Program is running ......!");
+////		
+////
+////		**********************Duplicates finder ******************************
 //		
+//		
+//		DuplicateFinder finder = new DuplicateFinder();
 //
-//		**********************Duplicates finder ******************************
-		
-		
-		DuplicateFinder finder = new DuplicateFinder();
-
-		Map<String, List<FileData>> result = finder.findDuplicates(files);
-		Map<String, List<FileData>> duplicates = finder.getOnlyDuplicates(result);
-
-		for (List<FileData> group : duplicates.values()) {
-		    System.out.println(dupe_file_count++ + "Duplicate group:");
-		    for (FileData f : group) {
-		        System.out.println(f.getPath());
-		    }
+////		Map<String, List<FileData>> result = finder.findDuplicates(files);
+////		Map<String, List<FileData>> duplicates = finder.getOnlyDuplicates(result);
+////
+////		for (List<FileData> group : duplicates.values()) {
+////		    System.out.println(dupe_file_count++ + "Duplicate group:");
+////		    for (FileData f : group) {
+////		        System.out.println(f.getPath());
+////		    }
 		}
 	}
 
-}
+	

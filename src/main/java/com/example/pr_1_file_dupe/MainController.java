@@ -116,9 +116,25 @@ public class MainController {
 
     @FXML
     public void showDuplicates(ActionEvent event) {
-        System.out.println("Duplicates screen not built yet!");
-    }
+    	try {
+            System.out.println("Opening Duplicates...");
+            // 1. Load the settings screen FXML
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/duplicate.fxml"));
+            javafx.scene.Parent DuplicateScreen = loader.load();
 
+            // 2. Get the button that was clicked to find the main window
+            javafx.scene.control.Button clickedButton = (javafx.scene.control.Button) event.getSource();
+            javafx.scene.layout.BorderPane mainLayout = (javafx.scene.layout.BorderPane) clickedButton.getScene().getRoot();
+
+            // 3. Swap the center of the screen to the Settings view
+            mainLayout.setCenter(DuplicateScreen);
+
+        } catch (Exception e) {
+            System.out.println("Error loading Duplicate screen!");
+            e.printStackTrace();
+        }
+    }
+    
     @FXML
     public void showCategories(ActionEvent event) {
     	
@@ -143,6 +159,23 @@ public class MainController {
 
     @FXML
     public void showRecovery(ActionEvent event) {
-        System.out.println("Recovery screen not built yet!");
+    	try {
+            System.out.println("Opening Recovery...");
+            // 1. Load the settings screen FXML
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/recovery.fxml"));
+            javafx.scene.Parent RecoveryScreen = loader.load();
+
+            // 2. Get the button that was clicked to find the main window
+            javafx.scene.control.Button clickedButton = (javafx.scene.control.Button) event.getSource();
+            javafx.scene.layout.BorderPane mainLayout = (javafx.scene.layout.BorderPane) clickedButton.getScene().getRoot();
+
+            // 3. Swap the center of the screen to the Settings view
+            mainLayout.setCenter(RecoveryScreen);
+
+        } catch (Exception e) {
+            System.out.println("Error loading Settings screen!");
+            e.printStackTrace();
+        }
     }
+    
 }

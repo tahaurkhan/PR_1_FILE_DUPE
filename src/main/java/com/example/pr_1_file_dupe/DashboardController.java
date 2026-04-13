@@ -4,6 +4,7 @@ import com.example.pr_1_file_dupe.service.FileScanner;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
@@ -91,7 +92,7 @@ public class DashboardController {
      // 3. Define what happens when the background task successfully finishes
         scanTask.setOnSucceeded(e -> {
             Map<String, List<FileData>> duplicates = scanTask.getValue();
-            
+            DashboardController.lastScanResults = duplicates;
             // ---> NEW: Get the scanner instance out of the task if possible, 
             // or just print the map sizes to verify it worked.
             System.out.println("Scan complete! Handing data to Results Screen...");
@@ -112,7 +113,20 @@ public class DashboardController {
                 System.out.println("Error loading results screen!");
             }
         });
+        
+        scanTask.setOnFailed(e -> {
+            loadingBox.setVisible(false);
+            scanButton.setDisable(false);
+            System.out.println("Scan failed: " + scanTask.getException().getMessage());
 
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Scan Failed");
+            alert.setHeaderText(null);
+            alert.setContentText("Could not complete scan: "
+                    + scanTask.getException().getMessage());
+            alert.showAndWait();
+        });
+        
         // 4. Start the Background Thread
         Thread backgroundThread = new Thread(scanTask);
         backgroundThread.setDaemon(true); // Ensures the background thread dies gracefully if the user closes the app
