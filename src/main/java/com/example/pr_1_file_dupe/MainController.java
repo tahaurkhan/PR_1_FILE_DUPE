@@ -4,193 +4,146 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+
 import java.io.IOException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainController {
-	// NEW: A cache to remember our screens so they don't reset!
-    private java.util.Map<String, javafx.scene.Parent> viewCache = new java.util.HashMap<>();
-    
-    // This grabs the main shell from our main.fxml
-    @FXML
+
+    @FXML 
     private BorderPane mainLayout;
 
-    // A helper method that does the heavy lifting of loading screens
-    private void loadScreen(String fxmlFileName) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/" + fxmlFileName));
-            Parent newScreen = loader.load();
-            
-            // This is the magic line: it replaces whatever is in the center with the new screen!
-            mainLayout.setCenter(newScreen);
-            
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Error loading screen: " + fxmlFileName);
-        }
-    }
+    // A cache to remember our screens so they don't reset!
+    private final Map<String, Parent> viewCache = new HashMap<>();
+
+    // Keep reference to currently active button for highlight tracking
+    private Button activeButton = null;
+
+    // ═══════════════════════════════════════════════
+    //  NAV BUTTON HANDLERS
+    // ═══════════════════════════════════════════════
+    
     @FXML
-    public void openCategories(javafx.event.ActionEvent event) {
-        System.out.println("Opening Categories...");
-        
-        // 1. Make sure they actually ran a scan first!
-        if (com.example.pr_1_file_dupe.DashboardController.lastScanResults == null || com.example.pr_1_file_dupe.DashboardController.lastScanResults.isEmpty()) {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
-            alert.setTitle("No Data");
-            alert.setHeaderText(null);
-            alert.setContentText("Please run a scan from the Dashboard first!");
-            alert.showAndWait();
+    public void showFiles(ActionEvent event) {
+        setActive((Button) event.getSource());
+        loadCachedScreen("/com/example/pr_1_file_dupe/fxml/dashboard.fxml");
+    }
+
+    @FXML
+    public void showDuplicates(ActionEvent event) {
+        setActive((Button) event.getSource());
+        loadCachedScreen("/com/example/pr_1_file_dupe/fxml/dupelicates.fxml");
+    }
+
+    @FXML
+    public void showCategories(ActionEvent event) {
+        setActive((Button) event.getSource());
+
+        // Make sure they actually ran a scan first!
+        if (DashboardController.lastScanResults == null || DashboardController.lastScanResults.isEmpty()) {
+            showError("Please run a scan from the Dashboard first!");
             return;
         }
 
         try {
-            // 2. Load the Categories UI
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/categories.fxml"));
-            javafx.scene.Parent categoriesScreen = loader.load();
+            // For Categories, we load fresh instead of caching so the chart always updates with new data
+            URL url = getClass().getResource("/com/example/pr_1_file_dupe/fxml/categories.fxml");
+            if (url == null) {
+                showError("categories.fxml not found.");
+                return;
+            }
 
-            // 3. Pass the data to the chart
-            com.example.pr_1_file_dupe.CategoriesController controller = loader.getController();
-            controller.generateChart(com.example.pr_1_file_dupe.DashboardController.lastScanResults);
+            FXMLLoader loader = new FXMLLoader(url);
+            Parent screen = loader.load();
 
-            // 4. Swap the screen
-            javafx.scene.control.Button clickedButton = (javafx.scene.control.Button) event.getSource();
-            javafx.scene.layout.BorderPane mainLayout = (javafx.scene.layout.BorderPane) clickedButton.getScene().getRoot();
-            mainLayout.setCenter(categoriesScreen);
+            // Pass the data to the chart
+            CategoriesController controller = loader.getController();
+            controller.generateChart(DashboardController.lastScanResults);
 
+            mainLayout.setCenter(screen);
         } catch (Exception e) {
-            System.out.println("Error loading Categories screen!");
             e.printStackTrace();
+            showError("Error loading Categories screen: " + e.getMessage());
         }
-    }                     
- // NEW: Smart screen swapper that uses the cache
-    private void switchScreen(String fxmlPath, javafx.event.ActionEvent event) {
+    }
+
+    @FXML
+    public void showRecovery(ActionEvent event) {
+        setActive((Button) event.getSource());
+        loadCachedScreen("/com/example/pr_1_file_dupe/fxml/recovery.fxml");
+    }
+
+    @FXML
+    public void openSettings(ActionEvent event) {
+        setActive((Button) event.getSource());
+        loadCachedScreen("/com/example/pr_1_file_dupe/fxml/setting.fxml");
+    }
+
+    // ═══════════════════════════════════════════════
+    //  ACTIVE HIGHLIGHT
+    // ═══════════════════════════════════════════════
+    
+    private void setActive(Button clicked) {
+        // Remove active style from previous button
+        if (activeButton != null) {
+            activeButton.getStyleClass().remove("nav-item-active");
+            if (!activeButton.getStyleClass().contains("nav-item")) {
+                activeButton.getStyleClass().add("nav-item");
+            }
+        }
+        // Apply active style to clicked button
+        clicked.getStyleClass().remove("nav-item");
+        if (!clicked.getStyleClass().contains("nav-item-active")) {
+            clicked.getStyleClass().add("nav-item-active");
+        }
+
+        activeButton = clicked;
+    }
+
+    // ═══════════════════════════════════════════════
+    //  HELPERS
+    // ═══════════════════════════════════════════════
+    
+    // Smart screen swapper that uses the cache
+    private void loadCachedScreen(String fxmlPath) {
         try {
             // 1. Check if we already built this screen
             if (!viewCache.containsKey(fxmlPath)) {
                 System.out.println("Loading " + fxmlPath + " for the first time...");
-                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource(fxmlPath));
-                javafx.scene.Parent screen = loader.load();
+                
+                URL url = getClass().getResource(fxmlPath);
+                if (url == null) {
+                    showError(fxmlPath + " not found. Check filename spelling.");
+                    return;
+                }
+                
+                FXMLLoader loader = new FXMLLoader(url);
+                Parent screen = loader.load();
                 
                 // Save it to the cache so we never have to build it again!
                 viewCache.put(fxmlPath, screen);
             }
 
-            // 2. Get the layout and swap the center to our cached screen
-            javafx.scene.control.Button clickedButton = (javafx.scene.control.Button) event.getSource();
-            javafx.scene.layout.BorderPane mainLayout = (javafx.scene.layout.BorderPane) clickedButton.getScene().getRoot();
-            
+            // 2. Set the center to our cached screen
             mainLayout.setCenter(viewCache.get(fxmlPath));
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println("Error swapping to screen: " + fxmlPath);
             e.printStackTrace();
+            showError("Error loading screen: " + e.getMessage());
         }
     }
 
-    public void openSettings(javafx.event.ActionEvent event) {
-        try {
-            System.out.println("Opening Settings...");
-            // 1. Load the settings screen FXML
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/setting.fxml"));
-            javafx.scene.Parent settingsScreen = loader.load();
-
-            // 2. Get the button that was clicked to find the main window
-            javafx.scene.control.Button clickedButton = (javafx.scene.control.Button) event.getSource();
-            javafx.scene.layout.BorderPane mainLayout = (javafx.scene.layout.BorderPane) clickedButton.getScene().getRoot();
-
-            // 3. Swap the center of the screen to the Settings view
-            mainLayout.setCenter(settingsScreen);
-
-        } catch (Exception e) {
-            System.out.println("Error loading Settings screen!");
-            e.printStackTrace();
-        }
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Navigation Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
-    
-    // Now our button clicks use the helper method
-    @FXML
-    public void showFiles(ActionEvent event) {
-        // We will tell this to load "dashboard.fxml" when clicked
-    	
-    	    try {
-    	        FXMLLoader loader = new FXMLLoader(getClass().getResource(
-    	                "/com/example/pr_1_file_dupe/fxml/dashboard.fxml"));
-    	        Parent screen = loader.load();
-
-    	        Button clickedButton = (Button) event.getSource();
-    	        BorderPane layout = (BorderPane) clickedButton.getScene().getRoot();
-    	        layout.setCenter(screen);
-
-    	    } catch (Exception e) {
-    	        System.out.println("Error loading Dashboard!");
-    	        e.printStackTrace();
-    	    }
-    	
-    }
-
-    @FXML
-    public void showDuplicates(ActionEvent event) {
-    	try {
-            System.out.println("Opening Duplicates...");
-            // 1. Load the settings screen FXML
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/dupelicate.fxml"));
-            javafx.scene.Parent DuplicateScreen = loader.load();
-
-            // 2. Get the button that was clicked to find the main window
-            javafx.scene.control.Button clickedButton = (javafx.scene.control.Button) event.getSource();
-            javafx.scene.layout.BorderPane mainLayout = (javafx.scene.layout.BorderPane) clickedButton.getScene().getRoot();
-
-            // 3. Swap the center of the screen to the Settings view
-            mainLayout.setCenter(DuplicateScreen);
-
-        } catch (Exception e) {
-            System.out.println("Error loading Duplicate screen!");
-            e.printStackTrace();
-        }
-    }
-    
-    @FXML
-    public void showCategories(ActionEvent event) {
-    	
-        try {
-        	System.out.println("Opening Categories...");
-            // 1. Load the settings screen FXML
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/categories.fxml"));
-            javafx.scene.Parent categoriesScreen = loader.load();
-
-            // 2. Get the button that was clicked to find the main window
-            javafx.scene.control.Button clickedButton = (javafx.scene.control.Button) event.getSource();
-            javafx.scene.layout.BorderPane mainLayout = (javafx.scene.layout.BorderPane) clickedButton.getScene().getRoot();
-
-            // 3. Swap the center of the screen to the Settings view
-            mainLayout.setCenter(categoriesScreen);
-
-        } catch (Exception e) {
-            System.out.println("Error loading Caegories screen!");
-            e.printStackTrace();
-		}
-    }
-
-    @FXML
-    public void showRecovery(ActionEvent event) {
-    	try {
-            System.out.println("Opening Recovery...");
-            // 1. Load the settings screen FXML
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/recovery.fxml"));
-            javafx.scene.Parent RecoveryScreen = loader.load();
-
-            // 2. Get the button that was clicked to find the main window
-            javafx.scene.control.Button clickedButton = (javafx.scene.control.Button) event.getSource();
-            javafx.scene.layout.BorderPane mainLayout = (javafx.scene.layout.BorderPane) clickedButton.getScene().getRoot();
-
-            // 3. Swap the center of the screen to the Settings view
-            mainLayout.setCenter(RecoveryScreen);
-
-        } catch (Exception e) {
-            System.out.println("Error loading Settings screen!");
-            e.printStackTrace();
-        }
-    }
-    
 }

@@ -23,36 +23,43 @@ public class RecoveryController {
     @FXML private TableColumn<LogEntry, String> logSizeCol;
     @FXML private TableColumn<LogEntry, String> logPathCol;
 
-    // Static session log shared with DuplicatesController
-    private static final ObservableList<LogEntry> sessionLog =
-            FXCollections.observableArrayList();
+ // In RecoveryController.java
 
-    @FXML
-    public void initialize() {
-        // Load lifetime stats from DataStore
-        DataStore store = new DataStore();
-        long savedBytes = Long.parseLong(store.getTotalSaved());
+ // Static list lives at class level — survives screen reloads
+ private static final ObservableList<LogEntry> sessionLog =
+         FXCollections.observableArrayList();
 
-        spaceSavedLabel.setText(formatSize(savedBytes));
-        filesDeletedLabel.setText(store.getTotalGroups());
-        scansRunLabel.setText(store.getTotalScanned());
+ @FXML
+ public void initialize() {
+     // Wire columns
+     logTimeCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().time));
+     logNameCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name));
+     logSizeCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().size));
+     logPathCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().path));
 
-        // Wire up the log table columns
-        logTimeCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().time));
-        logNameCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name));
-        logSizeCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().size));
-        logPathCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().path));
+     // ✅ Always re-bind — works even if screen was reloaded
+     logTable.setItems(sessionLog);
 
-        logTable.setItems(sessionLog);
-    }
+     // Refresh stats from DataStore
+     DataStore store = new DataStore();
+     long savedBytes = Long.parseLong(store.getTotalSaved());
+     spaceSavedLabel.setText(formatSize(savedBytes));
+     filesDeletedLabel.setText(store.getTotalGroups());
+     scansRunLabel.setText(store.getTotalScanned());
+ }
 
-    /** Called by DuplicatesController after each file is trashed */
-    public static void addToLog(FileData file) {
-        String time = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        sessionLog.add(new LogEntry(time, file.getName(),
-                formatSize(file.getSize()), file.getPath()));
-    }
-
+ // ✅ This is called from DuplicatesController after each file is trashed
+ public static void addToLog(FileData file) {
+     String time = java.time.LocalTime.now()
+             .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
+     // Add to front of list so newest deletions appear at top
+     sessionLog.add(0, new LogEntry(
+             time,
+             file.getName(),
+             formatSize(file.getSize()),
+             file.getPath()
+     ));
+ }
     @FXML
     public void clearLog() {
         sessionLog.clear();
