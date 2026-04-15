@@ -6,10 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
@@ -26,12 +23,31 @@ public class DashboardController {
     @FXML private Label     scannedCountLabel;
 
     public static Map<String, List<FileData>> lastScanResults;
+    private Tooltip pathTooltip;
 
     @FXML
     public void initialize() {
-        // ✅ No ToggleGroup here — that belongs in DuplicatesController
         DataStore store = new DataStore();
 
+        // ✅ Load and display saved folder path
+        String lastFolder = store.getLastFolder();
+        if (lastFolder != null && !lastFolder.isEmpty()) {
+            pathInputField.setText(lastFolder);
+        }
+
+        // ✅ Add tooltip that shows full path on hover after 1 second
+        pathTooltip = new Tooltip();
+        pathTooltip.setShowDelay(javafx.util.Duration.seconds(1));
+        Tooltip.install(pathInputField, pathTooltip);
+        
+        // Update tooltip text whenever path changes
+        pathInputField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.isEmpty()) {
+                pathTooltip.setText(newVal);
+            }
+        });
+
+        // Display stats
         long savedBytes = Long.parseLong(store.getTotalSaved());
         String formattedSize = (savedBytes >= 1024L * 1024 * 1024)
                 ? String.format("%.1f GB", savedBytes / (1024.0 * 1024 * 1024))
@@ -48,11 +64,26 @@ public class DashboardController {
     public void browseFolder() {
         javafx.stage.DirectoryChooser chooser = new javafx.stage.DirectoryChooser();
         chooser.setTitle("Select Folder to Scan");
-        chooser.setInitialDirectory(new java.io.File(System.getProperty("user.home")));
+        
+        // ✅ Start from last used folder if available
+        DataStore store = new DataStore();
+        String lastFolder = store.getLastFolder();
+        if (lastFolder != null && !lastFolder.isEmpty()) {
+            java.io.File lastDir = new java.io.File(lastFolder);
+            if (lastDir.exists() && lastDir.isDirectory()) {
+                chooser.setInitialDirectory(lastDir);
+            } else {
+                chooser.setInitialDirectory(new java.io.File(System.getProperty("user.home")));
+            }
+        } else {
+            chooser.setInitialDirectory(new java.io.File(System.getProperty("user.home")));
+        }
 
         java.io.File selected = chooser.showDialog(pathInputField.getScene().getWindow());
         if (selected != null) {
             pathInputField.setText(selected.getAbsolutePath());
+            // ✅ Save the selected folder path
+            store.setLastFolder(selected.getAbsolutePath());
         }
     }
 
@@ -68,6 +99,9 @@ public class DashboardController {
             alert.showAndWait();
             return;
         }
+
+        // ✅ Save the folder path before scanning
+        new DataStore().setLastFolder(targetFolder);
 
         loadingBox.setVisible(true);
         scanButton.setDisable(true);

@@ -38,6 +38,9 @@ public class MainController {
         // Apply saved theme on launch
         javafx.application.Platform.runLater(() ->
                 ThemeManager.apply(mainLayout.getScene()));
+        
+        // Load dashboard by default
+        showFiles(null);
     }
 
     // ═══════════════════════════════════════════════
@@ -87,7 +90,24 @@ public class MainController {
 
     @FXML public void openSetting(ActionEvent e) {
         setActive(btnSettings);
-        loadScreen("/com/example/pr_1_file_dupe/fxml/settings.fxml");
+        try {
+            // Try to load settings.fxml
+            java.net.URL settingsUrl = getClass().getResource(
+                    "/com/example/pr_1_file_dupe/fxml/settings.fxml");
+            
+            if (settingsUrl == null) {
+                showError("settings.fxml not found in resources.\nPlease ensure the file exists at:\nsrc/main/resources/com/example/pr_1_file_dupe/fxml/settings.fxml");
+                return;
+            }
+            
+            FXMLLoader loader = new FXMLLoader(settingsUrl);
+            Parent settingsScreen = loader.load();
+            mainLayout.setCenter(settingsScreen);
+            
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            showError("Error loading Settings: " + ex.getMessage());
+        }
     }
 
     // ═══════════════════════════════════════════════
@@ -181,25 +201,50 @@ public class MainController {
     }
 
     // ═══════════════════════════════════════════════
-    //  MENU — ABOUT
+    //  MENU — ABOUT (UPDATED)
     // ═══════════════════════════════════════════════
     @FXML
     public void menuAbout() {
-        Alert about = new Alert(Alert.AlertType.INFORMATION);
-        about.setTitle("About");
-        about.setHeaderText("Duplicate File Detector  v1.0");
-        about.setContentText(
-                "A smart tool to find and remove duplicate files.\n\n" +
-                "Built with Java 25 + JavaFX 21\n" +
-                "Author: Your Name\n\n" +
-                "Shortcuts:\n" +
-                "  Ctrl+O  →  Open Folder\n" +
-                "  Ctrl+Q  →  Quit\n" +
-                "  Ctrl+B  →  Toggle Sidebar\n" +
-                "  Ctrl++  →  Zoom In\n" +
-                "  Ctrl+-  →  Zoom Out\n" +
-                "  Ctrl+0  →  Reset Zoom");
-        about.showAndWait();
+        try {
+            // Try to load the new about.fxml
+            java.net.URL aboutUrl = getClass().getResource(
+                    "/com/example/pr_1_file_dupe/fxml/about.fxml");
+            
+            if (aboutUrl != null) {
+                // Load the FXML-based About screen
+                FXMLLoader loader = new FXMLLoader(aboutUrl);
+                Parent aboutScreen = loader.load();
+                mainLayout.setCenter(aboutScreen);
+            } else {
+                // Fallback to simple Alert dialog
+                Alert about = new Alert(Alert.AlertType.INFORMATION);
+                about.setTitle("About");
+                about.setHeaderText("Duplicate File Detector  v1.0");
+                about.setContentText(
+                        "A smart tool to find and remove duplicate files.\n\n" +
+                        "Built with Java 25 + JavaFX 21\n\n" +
+                        "Developers:\n" +
+                        "• Tahaur Nazrul Islam Khan\n" +
+                        "  Email: x.tahaur@gmail.com\n" +
+                        "  Phone: +91 9326964930\n\n" +
+                        "• Gupta Praveen\n" +
+                        "  Email: guptapraveen67984@gmail.com\n" +
+                        "  Phone: +91 744 753 4511\n\n" +
+                        "Shortcuts:\n" +
+                        "  Alt+F  →  File Menu\n" +
+                        "  Alt+E  →  Edit Menu\n" +
+                        "  Alt+V  →  View Menu\n" +
+                        "  Alt+S  →  Settings Menu\n" +
+                        "  Alt+A  →  About Menu\n" +
+                        "  Ctrl+O  →  Open Folder\n" +
+                        "  Ctrl+Q  →  Quit\n" +
+                        "  Ctrl+B  →  Toggle Sidebar");
+                about.showAndWait();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            showError("Error loading About screen: " + ex.getMessage());
+        }
     }
 
     @FXML

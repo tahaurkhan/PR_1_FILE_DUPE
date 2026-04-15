@@ -14,7 +14,7 @@
     <top>
         <MenuBar fx:id="menuBar" style="-fx-background-color: #f0f4f3;">
 
-            <!-- File Menu -->
+            <!-- File Menu (Alt+F) -->
             <Menu mnemonicParsing="true" text="_File">
                 <items>
                     <MenuItem text="Open Folder..."
@@ -30,7 +30,7 @@
                 </items>
             </Menu>
 
-            <!-- Edit Menu -->
+            <!-- Edit Menu (Alt+E) -->
             <Menu mnemonicParsing="true" text="_Edit">
                 <items>
                     <MenuItem text="Select All Duplicates"
@@ -46,7 +46,7 @@
                 </items>
             </Menu>
 
-            <!-- View Menu -->
+            <!-- View Menu (Alt+V) -->
             <Menu mnemonicParsing="true" text="_View">
                 <items>
                     <MenuItem text="Zoom In"
@@ -65,7 +65,16 @@
                 </items>
             </Menu>
 
-            <!-- About Menu -->
+            <!-- Settings Menu (Alt+S) - NEW -->
+            <Menu mnemonicParsing="true" text="_Settings">
+                <items>
+                    <MenuItem text="Preferences..."
+                              onAction="#openSetting"
+                              accelerator="CTRL+COMMA" />
+                </items>
+            </Menu>
+
+            <!-- About Menu (Alt+A) -->
             <Menu mnemonicParsing="true" text="_About">
                 <items>
                     <MenuItem text="About Duplicate Finder"
@@ -102,31 +111,31 @@
                     maxWidth="Infinity"
                     onAction="#showFiles"
                     styleClass="nav-item"
-                    text="🗂 Files" />
+                    text="🗂  Files" />
 
             <Button fx:id="btnDuplicates"
                     maxWidth="Infinity"
                     onAction="#showDuplicates"
                     styleClass="nav-item"
-                    text="🔁 Duplicates" />
+                    text="🔁  Duplicates" />
 
             <Button fx:id="btnCategories"
                     maxWidth="Infinity"
                     onAction="#showCategories"
                     styleClass="nav-item"
-                    text="📊 Categories" />
+                    text="📊  Categories" />
 
             <Button fx:id="btnRecovery"
                     maxWidth="Infinity"
                     onAction="#showRecovery"
                     styleClass="nav-item"
-                    text="♻ Recovery" />
+                    text="♻  Recovery" />
 
             <Button fx:id="btnSettings"
                     maxWidth="Infinity"
                     onAction="#openSetting"
                     styleClass="nav-item"
-                    text="⚙ Settings" />
+                    text="⚙  Settings" />
         </VBox>
     </left>
 

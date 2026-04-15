@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="30" style="-fx-padding: 40; -fx-background-color: #f8fcfd; -fx-alignment: CENTER;"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.pr_1_file_dupe.AboutController">
+
+    <!-- App Header -->
+    <VBox alignment="CENTER" spacing="8" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        <Label style="-fx-font-size: 36px;" text="🔍" />
+        <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Duplicate File Detector" />
+        <Label style="-fx-font-size: 16px; -fx-text-fill: #7f8c8d;" text="Version 1.0" />
+        <Label wrapText="true" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-text-alignment: center;" 
+               text="A smart tool to find and remove duplicate files from your system" />
+    </VBox>
+
+    <!-- Developers Section -->
+    <VBox spacing="20" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="👨‍💻 Development Team" />
+        
+        <!-- Developer 1 -->
+        <VBox spacing="10" style="-fx-background-color: #f8fcfd; -fx-padding: 20; -fx-background-radius: 10;">
+            <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #006565;" text="Tahaur Nazrul Islam Khan" />
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" text="📧" />
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" text="x.tahaur@gmail.com" />
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" text="📱" />
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" text="+91 9326964930" />
+            </HBox>
+            
+            <!-- Social Media Links -->
+            <HBox spacing="10" style="-fx-padding: 10 0 0 0;">
+                <Button fx:id="dev1LinkedIn" onAction="#openDev1LinkedIn" 
+                        style="-fx-background-color: #0077b5; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16;"
+                        text="LinkedIn" />
+                <Button fx:id="dev1GitHub" onAction="#openDev1GitHub"
+                        style="-fx-background-color: #333; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16;"
+                        text="GitHub" />
+                <Button fx:id="dev1Twitter" onAction="#openDev1Twitter"
+                        style="-fx-background-color: #1DA1F2; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16;"
+                        text="Twitter" />
+            </HBox>
+        </VBox>
+
+        <!-- Developer 2 -->
+        <VBox spacing="10" style="-fx-background-color: #f8fcfd; -fx-padding: 20; -fx-background-radius: 10;">
+            <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #006565;" text="Gupta Praveen" />
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" text="📧" />
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" text="guptapraveen67984@gmail.com" />
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" text="📱" />
+                <Label style="-fx-font-size: 14px; -fx-text-fill: #2c3e50;" text="+91 744 753 4511" />
+            </HBox>
+            
+            <!-- Social Media Links -->
+            <HBox spacing="10" style="-fx-padding: 10 0 0 0;">
+                <Button fx:id="dev2LinkedIn" onAction="#openDev2LinkedIn"
+                        style="-fx-background-color: #0077b5; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16;"
+                        text="LinkedIn" />
+                <Button fx:id="dev2GitHub" onAction="#openDev2GitHub"
+                        style="-fx-background-color: #333; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16;"
+                        text="GitHub" />
+                <Button fx:id="dev2Twitter" onAction="#openDev2Twitter"
+                        style="-fx-background-color: #1DA1F2; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16;"
+                        text="Twitter" />
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <!-- Tech Stack -->
+    <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="🛠 Built With" />
+        <HBox spacing="15" alignment="CENTER">
+            <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Java 25" />
+            <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="•" />
+            <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="JavaFX 21" />
+            <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="•" />
+            <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Maven" />
+        </HBox>
+    </VBox>
+
+    <!-- Copyright -->
+    <Label style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" text="© 2026 Duplicate File Detector. All rights reserved." />
+
+</VBox>
