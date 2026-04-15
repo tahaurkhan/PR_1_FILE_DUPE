@@ -85,9 +85,9 @@ public class MainController {
         loadScreen("/com/example/pr_1_file_dupe/fxml/recovery.fxml");
     }
 
-    @FXML public void openSettings(ActionEvent e) {
+    @FXML public void openSetting(ActionEvent e) {
         setActive(btnSettings);
-        loadScreen("/com/example/pr_1_file_dupe/fxml/setting.fxml");
+        loadScreen("/com/example/pr_1_file_dupe/fxml/settings.fxml");
     }
 
     // ═══════════════════════════════════════════════
