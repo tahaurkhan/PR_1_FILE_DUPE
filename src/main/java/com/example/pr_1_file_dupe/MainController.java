@@ -51,7 +51,7 @@ public class MainController {
     @FXML public void showDuplicates(ActionEvent e) {
         setActive(btnDuplicates);
         java.net.URL url = getClass().getResource(
-                "/com/example/pr_1_file_dupe/fxml/duplicates.fxml");
+                "/com/example/pr_1_file_dupe/fxml/dupelicate.fxml");
         if (url == null) { showError("duplicates.fxml not found."); return; }
         try {
             mainLayout.setCenter(new FXMLLoader(url).load());
