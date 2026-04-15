@@ -74,7 +74,7 @@
                              -fx-font-weight: bold;"
                       text="ON" />
     </HBox>
-</VBox>
+</VBox>1
     </VBox>
 
     <Button onAction="#saveSettings" prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 10;" text="Save Settings" />
