@@ -40,6 +40,38 @@ public class DuplicatesController {
     private static final Set<String> DOC_TYPES =
             Set.of("pdf", "doc", "docx", "txt", "xlsx", "pptx", "csv");
 
+    @FXML
+    public void exportToCSV() {
+        if (DashboardController.lastScanResults == null || DashboardController.lastScanResults.isEmpty()) {
+            return;
+        }
+
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Save Duplicate Report");
+        fileChooser.setInitialFileName("Duplicate_Scan_Report.csv");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
+        
+        java.io.File file = fileChooser.showSaveDialog(duplicatesTable.getScene().getWindow());
+
+        if (file != null) {
+            try (java.io.PrintWriter writer = new java.io.PrintWriter(file)) {
+                writer.println("Group,File Name,Size (Bytes),Path");
+                int groupNumber = 1;
+                
+                for (List<FileData> fileList : DashboardController.lastScanResults.values()) {
+                    if (fileList.size() > 1) { 
+                        for (FileData data : fileList) {
+                            writer.println("Group " + groupNumber + ",\"" + data.getName() + "\"," + data.getSize() + ",\"" + data.getPath() + "\"");
+                        }
+                        groupNumber++;
+                    }
+                }
+                new Alert(Alert.AlertType.INFORMATION, "Report saved to:\n" + file.getAbsolutePath()).showAndWait();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
     // ═══════════════════════════════════════════════
     //  INITIALIZE
     // ═══════════════════════════════════════════════

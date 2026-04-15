@@ -23,7 +23,31 @@ public class DataStore {
             }
         }
     }
+ // ── Add these methods to your existing DataStore.java ──
 
+    public boolean isDarkTheme() {
+        return Boolean.parseBoolean(props.getProperty("darkTheme", "false"));
+    }
+    public void setDarkTheme(boolean dark) {
+        props.setProperty("darkTheme", String.valueOf(dark));
+        save();
+    }
+
+    public boolean isSafeMode() {
+        return Boolean.parseBoolean(props.getProperty("safeMode", "true"));
+    }
+    public void setSafeMode(boolean safe) {
+        props.setProperty("safeMode", String.valueOf(safe));
+        save();
+    }
+
+    public String getLastFolder() {
+        return props.getProperty("lastFolder", "");
+    }
+    public void setLastFolder(String path) {
+        props.setProperty("lastFolder", path);
+        save();
+    }
     public void updateStats(long spaceSaved, int groupsFound, int scannedCount) {
         long currentSaved = Long.parseLong(props.getProperty("totalSaved", "0"));
         int currentGroups = Integer.parseInt(props.getProperty("totalGroups", "0"));

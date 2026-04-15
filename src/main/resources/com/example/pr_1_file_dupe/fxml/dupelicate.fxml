@@ -126,5 +126,10 @@
                        -fx-font-weight: bold; -fx-background-radius: 8;
                        -fx-padding: 10 24; -fx-font-size: 14px;"
                 text="🗑  Delete Selected" />
+                
     </HBox>
+    <Button onAction="#exportToCSV"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16;"
+                text="📊 Export CSV" />
 </VBox>

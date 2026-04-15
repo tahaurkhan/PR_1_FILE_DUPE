@@ -39,7 +39,42 @@
                 <Label style="-fx-font-size: 14px;" text="KB" />
             </HBox>
         </VBox>
-        
+        <!-- Dark Theme Toggle -->
+<VBox spacing="10" style="-fx-padding: 20 0 0 0;">
+    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Appearance" />
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <VBox>
+            <Label style="-fx-font-size: 14px;" text="Dark Theme" />
+            <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"
+                   text="Switch between light and dark mode instantly." />
+        </VBox>
+        <HBox HBox.hgrow="ALWAYS"/>
+        <ToggleButton fx:id="darkThemeToggle"
+                      onAction="#toggleDarkTheme"
+                      style="-fx-background-radius: 20; -fx-padding: 5 18;
+                             -fx-font-weight: bold;"
+                      text="OFF" />
+    </HBox>
+</VBox>
+
+<!-- Safe Mode Toggle -->
+<VBox spacing="10" style="-fx-padding: 10 0 0 0;">
+    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Safety" />
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <VBox>
+            <Label style="-fx-font-size: 14px;" text="Safe Mode" />
+            <Label fx:id="safeModeDesc"
+                   style="-fx-text-fill: #27ae60; -fx-font-size: 12px;"
+                   text="ON — Files moved to Trash (recoverable)" />
+        </VBox>
+        <HBox HBox.hgrow="ALWAYS"/>
+        <ToggleButton fx:id="safeModeToggle"
+                      onAction="#toggleSafeMode"
+                      style="-fx-background-radius: 20; -fx-padding: 5 18;
+                             -fx-font-weight: bold;"
+                      text="ON" />
+    </HBox>
+</VBox>
     </VBox>
 
     <Button onAction="#saveSettings" prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 10;" text="Save Settings" />
