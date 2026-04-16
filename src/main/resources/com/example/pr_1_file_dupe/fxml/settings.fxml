@@ -6,6 +6,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -24,6 +25,7 @@
     <VBox spacing="20.0" 
     style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
         
+        <!-- Algorithm Selection -->
         <VBox spacing="10.0">
             <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" 
             text="Comparison Algorithm" />
@@ -40,6 +42,7 @@
             </ComboBox>
         </VBox>
 
+        <!-- Exclusions & Filters -->
         <VBox spacing="10.0" style="-fx-padding: 20 0 0 0;">
             <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Exclusions &amp; Filters" />
             <CheckBox fx:id="skipHiddenCheckbox" style="-fx-font-size: 14px;" text="Skip hidden system files (Recommended)" />
@@ -50,43 +53,48 @@
                 <Label style="-fx-font-size: 14px;" text="KB" />
             </HBox>
         </VBox>
-        <!-- Dark Theme Toggle -->
 
-<VBox spacing="15">
-
-    <Label text="Appearance"/>
-
-    <HBox spacing="10">
-        <Label text="Dark Mode"/>
-        <ToggleButton fx:id="darkModeToggle"/>
-    </HBox>
-
-    <HBox spacing="10">
-        <Label text="Safe Mode"/>
-        <ToggleButton fx:id="safeModeToggle"/>
-    </HBox>
-
-</VBox>
-
-<!-- Safe Mode Toggle -->
-<VBox spacing="10" style="-fx-padding: 10 0 0 0;">
-    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Safety" />
-    <HBox alignment="CENTER_LEFT" spacing="16">
-        <VBox>
-            <Label style="-fx-font-size: 14px;" text="Safe Mode" />
-            <Label fx:id="safeModeDesc"
-                   style="-fx-text-fill: #27ae60; -fx-font-size: 12px;"
-                   text="ON — Files moved to Trash (recoverable)" />
+        <!-- Appearance - Dark Mode -->
+        <VBox spacing="10" style="-fx-padding: 20 0 0 0;">
+            <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Appearance" />
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label style="-fx-font-size: 14px;" text="Dark Mode" />
+                    <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"
+                           text="Switch between light and dark theme" />
+                </VBox>
+                <HBox HBox.hgrow="ALWAYS"/>
+                <!-- 🔥 FIXED: Removed onAction, using listener in controller -->
+                <ToggleButton fx:id="darkThemeToggle"
+                              style="-fx-background-radius: 20; -fx-padding: 5 18;
+                                     -fx-font-weight: bold;"
+                              text="OFF" />
+            </HBox>
         </VBox>
-        <HBox HBox.hgrow="ALWAYS"/>
-        <ToggleButton fx:id="safeModeToggle"
-                      onAction="#toggleSafeMode"
-                      style="-fx-background-radius: 20; -fx-padding: 5 18;
-                             -fx-font-weight: bold;"
-                      text="ON" />
-    </HBox>
-</VBox>
-    </VBox>
 
+        <!-- Safe Mode Toggle -->
+        <VBox spacing="10" style="-fx-padding: 10 0 0 0;">
+            <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Safety" />
+            <HBox alignment="CENTER_LEFT" spacing="16">
+                <VBox>
+                    <Label style="-fx-font-size: 14px;" text="Safe Mode" />
+                    <Label fx:id="safeModeDesc"
+                           style="-fx-text-fill: #27ae60; -fx-font-size: 12px;"
+                           text="ON — Files moved to Trash (recoverable)" />
+                </VBox>
+                <HBox HBox.hgrow="ALWAYS"/>
+                <!-- 🔥 FIXED: Removed onAction, using listener in controller -->
+                <ToggleButton fx:id="safeModeToggle"
+                              style="-fx-background-radius: 20; -fx-padding: 5 18;
+                                     -fx-font-weight: bold;"
+                              text="ON" />
+            </HBox>
+        </VBox>
+
+        <!-- Status Label -->
+        <Label fx:id="statusLabel"
+               style="-fx-font-size: 13px; -fx-text-fill: #27ae60; -fx-font-style: italic; -fx-padding: 10 0 0 0;"
+               text="Settings auto-saved" />
+    </VBox>
 
 </VBox>

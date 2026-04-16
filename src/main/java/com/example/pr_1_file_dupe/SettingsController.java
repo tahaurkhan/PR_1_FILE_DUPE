@@ -64,12 +64,16 @@ public class SettingsController {
 
         // ⚙️ ALGORITHM (INSTANT)
         algoDropdown.valueProperty().addListener((obs, oldVal, newVal) -> {
-            store.setHashAlgorithm(newVal);
+            if (newVal != null) {
+                store.setHashAlgorithm(newVal);
+                statusLabel.setText("Algorithm: " + newVal);
+            }
         });
 
         // 📁 SKIP HIDDEN (INSTANT)
         skipHiddenCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
             store.setSkipHidden(newVal);
+            statusLabel.setText(newVal ? "Skipping hidden files" : "Including hidden files");
         });
 
         // 📏 MIN SIZE (INSTANT)
@@ -77,9 +81,9 @@ public class SettingsController {
             try {
                 long value = Long.parseLong(newVal);
                 store.setMinFileSizeKB(value);
-                statusLabel.setText("Updated");
+                statusLabel.setText("Min size: " + value + " KB");
             } catch (Exception e) {
-                statusLabel.setText("Enter valid number");
+                // Invalid input, ignore
             }
         });
     }
@@ -96,10 +100,16 @@ public class SettingsController {
 
     private void applyTheme(boolean dark) {
         Scene scene = darkThemeToggle.getScene();
-        scene.getStylesheets().clear();
+        if (scene != null) {
+            scene.getStylesheets().clear();
 
-        String css = dark ? "/styles/dark.css" : "/styles/light.css";
-        scene.getStylesheets().add(getClass().getResource(css).toExternalForm());
+            String css = dark 
+                ? "/com/example/pr_1_file_dupe/CSS/dark-theme.css" 
+                : "/com/example/pr_1_file_dupe/CSS/application.css";
+            
+            String cssPath = getClass().getResource(css).toExternalForm();
+            scene.getStylesheets().add(cssPath);
+        }
     }
 
     // =============================
@@ -108,19 +118,21 @@ public class SettingsController {
     private void updateSafeModeUI(boolean safe) {
         safeModeToggle.setText(safe ? "ON" : "OFF");
         safeModeToggle.setStyle(safe
-                ? "-fx-background-color: #27ae60; -fx-text-fill: white;"
-                : "-fx-background-color: #e74c3c; -fx-text-fill: white;");
+                ? "-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 20;"
+                : "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 20;");
 
-        safeModeDesc.setText(safe
-                ? "ON — Files moved to Trash"
-                : "OFF — Permanent delete ⚠");
+        if (safeModeDesc != null) {
+            safeModeDesc.setText(safe
+                    ? "ON — Files moved to Trash (recoverable)"
+                    : "OFF — Permanent delete ⚠");
+        }
     }
 
     private void showWarning() {
         Alert warn = new Alert(Alert.AlertType.WARNING);
         warn.setTitle("Warning");
         warn.setHeaderText("Permanent Delete Enabled");
-        warn.setContentText("Files will be permanently deleted.");
+        warn.setContentText("Files will be permanently deleted when you click delete. This cannot be undone.");
         warn.showAndWait();
     }
 }

@@ -3,10 +3,14 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox spacing="30" style="-fx-padding: 40; -fx-background-color: #f8fcfd; -fx-alignment: CENTER;"
-      xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.pr_1_file_dupe.AboutController">
+<!-- 🔥 FIXED: Wrapped everything in ScrollPane -->
+<ScrollPane fitToWidth="true" 
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.pr_1_file_dupe.AboutController"
+            style="-fx-background-color: #f8fcfd;">
+
+<VBox spacing="30" style="-fx-padding: 40; -fx-background-color: #f8fcfd; -fx-alignment: CENTER;">
 
     <!-- App Header -->
     <VBox alignment="CENTER" spacing="8" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
@@ -86,7 +90,22 @@
         </HBox>
     </VBox>
 
+    <!-- Keyboard Shortcuts -->
+    <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="⌨️ Keyboard Shortcuts" />
+        <VBox spacing="5">
+            <Label style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;" text="Ctrl+O  →  Open Folder" />
+            <Label style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;" text="Ctrl+N  →  New Scan" />
+            <Label style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;" text="Ctrl+B  →  Toggle Sidebar" />
+            <Label style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;" text="Ctrl++  →  Zoom In" />
+            <Label style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;" text="Ctrl+-  →  Zoom Out" />
+            <Label style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;" text="Ctrl+0  →  Reset Zoom" />
+            <Label style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d;" text="Ctrl+Q  →  Quit Application" />
+        </VBox>
+    </VBox>
+
     <!-- Copyright -->
-    <Label style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" text="© 2026 Duplicate File Detector. All rights reserved." />
+    <Label style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d; -fx-padding: 20 0 0 0;" text="© 2026 Duplicate File Detector. All rights reserved." />
 
 </VBox>
+</ScrollPane>

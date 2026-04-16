@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
@@ -25,6 +26,7 @@ public class MainController {
     @FXML private Button     btnCategories;
     @FXML private Button     btnRecovery;
     @FXML private Button     btnSettings;
+    @FXML private StackPane  contentPane;
 
     private Button  activeButton   = null;
     private boolean sidebarVisible = true;
@@ -55,7 +57,7 @@ public class MainController {
         setActive(btnDuplicates);
         java.net.URL url = getClass().getResource(
                 "/com/example/pr_1_file_dupe/fxml/dupelicate.fxml");
-        if (url == null) { showError("duplicates.fxml not found."); return; }
+        if (url == null) { showError("dupelicate.fxml not found."); return; }
         try {
             mainLayout.setCenter(new FXMLLoader(url).load());
         } catch (Exception ex) {
@@ -91,7 +93,6 @@ public class MainController {
     @FXML public void openSetting(ActionEvent e) {
         setActive(btnSettings);
         try {
-            // Try to load settings.fxml
             java.net.URL settingsUrl = getClass().getResource(
                     "/com/example/pr_1_file_dupe/fxml/settings.fxml");
             
@@ -144,7 +145,6 @@ public class MainController {
     // ═══════════════════════════════════════════════
     @FXML
     public void menuOpenFolder() {
-        // Switch to dashboard then trigger browse
         setActive(btnFiles);
         loadScreen("/com/example/pr_1_file_dupe/fxml/dashboard.fxml");
     }
@@ -175,7 +175,7 @@ public class MainController {
     @FXML public void menuDeleteSelected() { System.out.println("Delete Selected"); }
 
     // ═══════════════════════════════════════════════
-    //  MENU — VIEW  (Zoom)
+    //  MENU — VIEW  (Zoom - FIXED to zoom only content)
     // ═══════════════════════════════════════════════
     @FXML
     public void menuZoomIn() {
@@ -195,23 +195,24 @@ public class MainController {
         applyZoom();
     }
 
+    // 🔥 FIXED: Only zoom the content area, not menu bar
     private void applyZoom() {
-        mainLayout.setScaleX(currentZoom);
-        mainLayout.setScaleY(currentZoom);
+        if (mainLayout.getCenter() != null) {
+            mainLayout.getCenter().setScaleX(currentZoom);
+            mainLayout.getCenter().setScaleY(currentZoom);
+        }
     }
 
     // ═══════════════════════════════════════════════
-    //  MENU — ABOUT (UPDATED)
+    //  MENU — ABOUT
     // ═══════════════════════════════════════════════
     @FXML
     public void menuAbout() {
         try {
-            // Try to load the new about.fxml
             java.net.URL aboutUrl = getClass().getResource(
                     "/com/example/pr_1_file_dupe/fxml/about.fxml");
             
             if (aboutUrl != null) {
-                // Load the FXML-based About screen
                 FXMLLoader loader = new FXMLLoader(aboutUrl);
                 Parent aboutScreen = loader.load();
                 mainLayout.setCenter(aboutScreen);
@@ -229,16 +230,7 @@ public class MainController {
                         "  Phone: +91 9326964930\n\n" +
                         "• Gupta Praveen\n" +
                         "  Email: guptapraveen67984@gmail.com\n" +
-                        "  Phone: +91 744 753 4511\n\n" +
-                        "Shortcuts:\n" +
-                        "  Alt+F  →  File Menu\n" +
-                        "  Alt+E  →  Edit Menu\n" +
-                        "  Alt+V  →  View Menu\n" +
-                        "  Alt+S  →  Settings Menu\n" +
-                        "  Alt+A  →  About Menu\n" +
-                        "  Ctrl+O  →  Open Folder\n" +
-                        "  Ctrl+Q  →  Quit\n" +
-                        "  Ctrl+B  →  Toggle Sidebar");
+                        "  Phone: +91 744 753 4511");
                 about.showAndWait();
             }
         } catch (IOException ex) {
@@ -247,13 +239,20 @@ public class MainController {
         }
     }
 
+    // 🔥 FIXED: Open email client instead of browser
     @FXML
     public void menuReportBug() {
         try {
-            java.awt.Desktop.getDesktop().browse(
-                    new java.net.URI("https://github.com/yourname/duplicate-finder/issues"));
+            String subject = "Bug Report - Duplicate File Detector";
+            String body = "Please describe the bug you encountered:\n\n";
+            String mailto = "mailto:x.tahaur@gmail.com,guptapraveen67984@gmail.com"
+                    + "?subject=" + java.net.URLEncoder.encode(subject, "UTF-8")
+                    + "&body=" + java.net.URLEncoder.encode(body, "UTF-8");
+            
+            java.awt.Desktop.getDesktop().mail(new java.net.URI(mailto));
         } catch (Exception e) {
-            showError("Could not open browser.");
+            e.printStackTrace();
+            showError("Could not open email client. Please email us at:\nx.tahaur@gmail.com\nguptapraveen67984@gmail.com");
         }
     }
 

@@ -132,20 +132,24 @@ public class DashboardController {
             scanButton.setDisable(false);
 
             try {
+                // 🔥 FIXED: Load dupelicate.fxml instead of results.fxml
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(
-                        "/com/example/pr_1_file_dupe/fxml/results.fxml"));
-                Parent resultsScreen = loader.load();
+                        "/com/example/pr_1_file_dupe/fxml/dupelicate.fxml"));
+                Parent duplicatesScreen = loader.load();
 
-                ResultsController controller = loader.getController();
-                controller.displayResults(duplicates);
+                BorderPane mainLayout = (BorderPane) pathInputField.getScene().getRoot();
+                mainLayout.setCenter(duplicatesScreen);
 
-                BorderPane mainLayout =
-                        (BorderPane) pathInputField.getScene().getRoot();
-                mainLayout.setCenter(resultsScreen);
+                // 🔥 Show completion message
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Scan Complete");
+                alert.setHeaderText(null);
+                alert.setContentText("Found " + duplicates.size() + " duplicate groups with " + totalFiles + " total files.");
+                alert.showAndWait();
 
             } catch (Exception ex) {
                 ex.printStackTrace();
-                new Alert(Alert.AlertType.ERROR, "Could not load results: "
+                new Alert(Alert.AlertType.ERROR, "Could not load duplicates view: "
                         + ex.getMessage()).showAndWait();
             }
         });

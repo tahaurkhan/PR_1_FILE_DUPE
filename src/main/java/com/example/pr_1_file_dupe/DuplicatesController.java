@@ -7,6 +7,8 @@ import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.VBox;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class DuplicatesController {
@@ -48,7 +50,11 @@ public class DuplicatesController {
 
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
         fileChooser.setTitle("Save Duplicate Report");
-        fileChooser.setInitialFileName("Duplicate_Scan_Report.csv");
+        
+        // 🔥 FIXED: Add timestamp to filename
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        fileChooser.setInitialFileName("Duplicate_Scan_Report_" + timestamp + ".csv");
+        
         fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
         
         java.io.File file = fileChooser.showSaveDialog(duplicatesTable.getScene().getWindow());
