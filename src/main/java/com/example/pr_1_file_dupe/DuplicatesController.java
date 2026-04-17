@@ -68,7 +68,7 @@ public class DuplicatesController {
 
     @FXML
     public void initialize() {
-        // 🔥 FIXED: Use CheckBoxTreeItem's built in boolean property to handle parent/child cascade
+        // Bind the Checkbox to the TreeItem property correctly
         selectCol.setCellValueFactory(cellData -> {
             TreeItem<FileData> item = cellData.getValue();
             if (item instanceof CheckBoxTreeItem) {
@@ -154,13 +154,13 @@ public class DuplicatesController {
 
             CheckBoxTreeItem<FileData> groupNode = new CheckBoxTreeItem<>(header);
             groupNode.setExpanded(true);
-            groupNode.setIndependent(false); // 🔥 Enables auto-cascade to children
+            groupNode.setIndependent(false); // 🔥 THIS ENABLES PARENT-CHILD CASCADE SELECTION
 
             for (FileData f : files) {
                 CheckBoxTreeItem<FileData> childNode = new CheckBoxTreeItem<>(f);
                 childNode.setSelected(!f.getPath().equals(newest.getPath()));
                 
-                // Add listener to update selection count in real-time
+                // Update selection count in real-time
                 childNode.selectedProperty().addListener((obs, oldVal, newVal) -> refreshSelectedCount());
                 
                 groupNode.getChildren().add(childNode);
@@ -261,7 +261,6 @@ public class DuplicatesController {
             for (TreeItem<FileData> node : group.getChildren()) {
                 FileData f = node.getValue();
                 
-                // Read from CheckBoxTreeItem state instead of FileData
                 if (((CheckBoxTreeItem<FileData>)node).isSelected() && !f.getType().equals("Group")) {
                     File target = new File(f.getPath());
                     boolean success = false;

@@ -83,7 +83,7 @@ public class MainController {
 
     @FXML
     public void toggleSidebar() {
-        // 🔥 FIXED: Shrink to 45px instead of 0 so the hamburger menu stays visible
+        // Shrink to 45px instead of 0 so the hamburger menu stays visible
         double targetWidth = sidebarVisible ? 45 : 170;
 
         Timeline timeline = new Timeline(
@@ -97,7 +97,7 @@ public class MainController {
         timeline.setOnFinished(ev -> {
             boolean nowVisible = targetWidth > 45;
             btnFiles.setText(nowVisible      ? "🗂  Files"       : "🗂");
-            btnDuplicates.setText(nowVisible ? "🔁  Duplicates"  : "🔁");
+            btnDuplicates.setText(nowVisible ? "⧉   Duplicates"  : "⧉");
             btnCategories.setText(nowVisible ? "📊  Categories"  : "📊");
             btnRecovery.setText(nowVisible   ? "♻  Recovery"    : "♻");
             btnSettings.setText(nowVisible   ? "⚙  Settings"    : "⚙");
@@ -149,7 +149,7 @@ public class MainController {
 
     @FXML
     public void menuReportBug() {
-        // 🔥 FIXED: Safe cross-platform mail handling (prevents Linux GTK crash)
+        // 🔥 FIXED: Check OS to prevent GTK error trap crash on Linux
         try {
             String mailto = "mailto:x.tahaur@gmail.com,guptapraveen67984@gmail.com?subject=Bug%20Report";
             String os = System.getProperty("os.name").toLowerCase();
@@ -159,11 +159,11 @@ public class MainController {
             } else if (os.contains("mac")) {
                 Runtime.getRuntime().exec("open " + mailto);
             } else {
-                // Linux fallback
+                // Safely copy to clipboard on Linux
                 javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
                 content.putString("x.tahaur@gmail.com, guptapraveen67984@gmail.com");
                 javafx.scene.input.Clipboard.getSystemClipboard().setContent(content);
-                showError("Email copied to clipboard! (Direct mail opening is restricted on this OS)");
+                showError("Direct mail opening is restricted on Linux. We copied the support email to your clipboard!");
             }
         } catch (Exception e) {
             showError("Could not open email client. Please email us at:\nx.tahaur@gmail.com");

@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 
 <BorderPane fx:id="mainLayout" prefHeight="650.0" prefWidth="920.0"
-            stylesheets="@../CSS/application.css"
+            
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.pr_1_file_dupe.MainController">
@@ -73,7 +73,7 @@
             <Separator style="-fx-padding: 4 0;" />
 
             <Button fx:id="btnFiles" maxWidth="Infinity" onAction="#showFiles" styleClass="nav-item" text="🗂  Files" />
-            <Button fx:id="btnDuplicates" maxWidth="Infinity" onAction="#showDuplicates" styleClass="nav-item" text="🔁  Duplicates" />
+            <Button fx:id="btnDuplicates" maxWidth="Infinity" onAction="#showDuplicates" styleClass="nav-item" text="⧉  Duplicates" />
             <Button fx:id="btnCategories" maxWidth="Infinity" onAction="#showCategories" styleClass="nav-item" text="📊  Categories" />
             <Button fx:id="btnRecovery" maxWidth="Infinity" onAction="#showRecovery" styleClass="nav-item" text="♻  Recovery" />
             <Button fx:id="btnSettings" maxWidth="Infinity" onAction="#openSetting" styleClass="nav-item" text="⚙  Settings" />

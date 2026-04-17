@@ -133,13 +133,34 @@
 .scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-opacity: 0; -fx-pref-width: 0; -fx-pref-height: 0; }
 
 /* Menu Bar */
-.menu-bar { -fx-background-color: #1e2626; -fx-border-color: transparent transparent #2e3838 transparent; }
-.menu-bar .menu { -fx-text-fill: -on-surface; }
-.menu-bar .menu:hover, .menu-bar .menu:focused { -fx-background-color: -primary-light; }
-.menu .menu-item { -fx-background-color: #242b2b; }
-.menu .menu-item:hover { -fx-background-color: -primary-light; }
-.menu .menu-item .label { -fx-text-fill: -on-surface; }
-.context-menu { -fx-background-color: #242b2b; -fx-border-color: #3a4e4e; -fx-border-radius: 8; -fx-background-radius: 8; }
+/* Menu Bar */
+.menu-bar { 
+    -fx-background-color: #1e2626; 
+    -fx-border-color: transparent transparent #2e3838 transparent; 
+}
+
+/* Menu aur Menu Item ka text white karne ke liye */
+.menu-bar .label, .menu .label, .menu-item .label {
+    -fx-text-fill: -on-surface; 
+}
+
+/* Hover effects */
+.menu-bar .menu:hover, .menu-bar .menu:showing { 
+    -fx-background-color: -primary-light; 
+}
+.menu .menu-item { 
+    -fx-background-color: #242b2b; 
+}
+.menu .menu-item:hover, .menu .menu-item:focused { 
+    -fx-background-color: -primary-light; 
+}
+.context-menu { 
+    -fx-background-color: #242b2b; 
+    -fx-border-color: #3a4e4e; 
+    -fx-border-radius: 8; 
+    -fx-background-radius: 8; 
+}
+
 
 /* Pie chart */
 .chart { -fx-background-color: transparent; }
