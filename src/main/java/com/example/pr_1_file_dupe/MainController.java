@@ -32,22 +32,13 @@ public class MainController {
     private boolean sidebarVisible = true;
     private double  currentZoom    = 1.0;
 
-    // ═══════════════════════════════════════════════
-    //  INITIALIZE
-    // ═══════════════════════════════════════════════
     @FXML
     public void initialize() {
-        // Apply saved theme on launch
         javafx.application.Platform.runLater(() ->
                 ThemeManager.apply(mainLayout.getScene()));
-        
-        // Load dashboard by default
         showFiles(null);
     }
 
-    // ═══════════════════════════════════════════════
-    //  NAV BUTTONS
-    // ═══════════════════════════════════════════════
     @FXML public void showFiles(ActionEvent e) {
         setActive(btnFiles);
         loadScreen("/com/example/pr_1_file_dupe/fxml/dashboard.fxml");
@@ -55,34 +46,24 @@ public class MainController {
 
     @FXML public void showDuplicates(ActionEvent e) {
         setActive(btnDuplicates);
-        java.net.URL url = getClass().getResource(
-                "/com/example/pr_1_file_dupe/fxml/dupelicate.fxml");
+        java.net.URL url = getClass().getResource("/com/example/pr_1_file_dupe/fxml/dupelicate.fxml");
         if (url == null) { showError("dupelicate.fxml not found."); return; }
-        try {
-            mainLayout.setCenter(new FXMLLoader(url).load());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            showError("Error loading Duplicates: " + ex.getMessage());
-        }
+        try { mainLayout.setCenter(new FXMLLoader(url).load()); } 
+        catch (Exception ex) { ex.printStackTrace(); showError("Error loading Duplicates: " + ex.getMessage()); }
     }
 
     @FXML public void showCategories(ActionEvent e) {
         setActive(btnCategories);
-        if (DashboardController.lastScanResults == null
-                || DashboardController.lastScanResults.isEmpty()) {
+        if (DashboardController.lastScanResults == null || DashboardController.lastScanResults.isEmpty()) {
             showError("Please run a scan from the Dashboard first.");
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(
-                    "/com/example/pr_1_file_dupe/fxml/categories.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/categories.fxml"));
             Parent screen = loader.load();
-            ((CategoriesController) loader.getController())
-                    .generateChart(DashboardController.lastScanResults);
+            ((CategoriesController) loader.getController()).generateChart(DashboardController.lastScanResults);
             mainLayout.setCenter(screen);
-        } catch (Exception ex) {
-            showError("Error loading Categories: " + ex.getMessage());
-        }
+        } catch (Exception ex) { showError("Error loading Categories: " + ex.getMessage()); }
     }
 
     @FXML public void showRecovery(ActionEvent e) {
@@ -93,30 +74,17 @@ public class MainController {
     @FXML public void openSetting(ActionEvent e) {
         setActive(btnSettings);
         try {
-            java.net.URL settingsUrl = getClass().getResource(
-                    "/com/example/pr_1_file_dupe/fxml/settings.fxml");
-            
-            if (settingsUrl == null) {
-                showError("settings.fxml not found in resources.\nPlease ensure the file exists at:\nsrc/main/resources/com/example/pr_1_file_dupe/fxml/settings.fxml");
-                return;
-            }
-            
+            java.net.URL settingsUrl = getClass().getResource("/com/example/pr_1_file_dupe/fxml/settings.fxml");
+            if (settingsUrl == null) { showError("settings.fxml not found."); return; }
             FXMLLoader loader = new FXMLLoader(settingsUrl);
-            Parent settingsScreen = loader.load();
-            mainLayout.setCenter(settingsScreen);
-            
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            showError("Error loading Settings: " + ex.getMessage());
-        }
+            mainLayout.setCenter(loader.load());
+        } catch (IOException ex) { ex.printStackTrace(); showError("Error loading Settings: " + ex.getMessage()); }
     }
 
-    // ═══════════════════════════════════════════════
-    //  SIDEBAR TOGGLE  (Ctrl+B)
-    // ═══════════════════════════════════════════════
     @FXML
     public void toggleSidebar() {
-        double targetWidth = sidebarVisible ? 0 : 170;
+        // 🔥 FIXED: Shrink to 45px instead of 0 so the hamburger menu stays visible
+        double targetWidth = sidebarVisible ? 45 : 170;
 
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.millis(200),
@@ -126,9 +94,8 @@ public class MainController {
                 )
         );
 
-        // Hide text labels when collapsed, show when expanded
         timeline.setOnFinished(ev -> {
-            boolean nowVisible = targetWidth > 0;
+            boolean nowVisible = targetWidth > 45;
             btnFiles.setText(nowVisible      ? "🗂  Files"       : "🗂");
             btnDuplicates.setText(nowVisible ? "🔁  Duplicates"  : "🔁");
             btnCategories.setText(nowVisible ? "📊  Categories"  : "📊");
@@ -140,62 +107,24 @@ public class MainController {
         timeline.play();
     }
 
-    // ═══════════════════════════════════════════════
-    //  MENU — FILE
-    // ═══════════════════════════════════════════════
-    @FXML
-    public void menuOpenFolder() {
-        setActive(btnFiles);
-        loadScreen("/com/example/pr_1_file_dupe/fxml/dashboard.fxml");
-    }
-
-    @FXML
-    public void menuNewScan() {
-        setActive(btnFiles);
-        loadScreen("/com/example/pr_1_file_dupe/fxml/dashboard.fxml");
-    }
-
-    @FXML
-    public void menuQuit() {
+    @FXML public void menuOpenFolder() { showFiles(null); }
+    @FXML public void menuNewScan() { showFiles(null); }
+    @FXML public void menuQuit() {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Quit");
         confirm.setHeaderText(null);
         confirm.setContentText("Are you sure you want to quit?");
-        confirm.showAndWait().ifPresent(btn -> {
-            if (btn == javafx.scene.control.ButtonType.OK)
-                javafx.application.Platform.exit();
-        });
+        confirm.showAndWait().ifPresent(btn -> { if (btn == javafx.scene.control.ButtonType.OK) javafx.application.Platform.exit(); });
     }
 
-    // ═══════════════════════════════════════════════
-    //  MENU — EDIT
-    // ═══════════════════════════════════════════════
-    @FXML public void menuSelectAll()      { System.out.println("Select All — wire to DuplicatesController"); }
-    @FXML public void menuDeselectAll()    { System.out.println("Deselect All"); }
-    @FXML public void menuDeleteSelected() { System.out.println("Delete Selected"); }
+    @FXML public void menuSelectAll() { }
+    @FXML public void menuDeselectAll() { }
+    @FXML public void menuDeleteSelected() { }
 
-    // ═══════════════════════════════════════════════
-    //  MENU — VIEW  (Zoom - FIXED to zoom only content)
-    // ═══════════════════════════════════════════════
-    @FXML
-    public void menuZoomIn() {
-        currentZoom = Math.min(currentZoom + 0.1, 2.0);
-        applyZoom();
-    }
+    @FXML public void menuZoomIn() { currentZoom = Math.min(currentZoom + 0.1, 2.0); applyZoom(); }
+    @FXML public void menuZoomOut() { currentZoom = Math.max(currentZoom - 0.1, 0.6); applyZoom(); }
+    @FXML public void menuZoomReset() { currentZoom = 1.0; applyZoom(); }
 
-    @FXML
-    public void menuZoomOut() {
-        currentZoom = Math.max(currentZoom - 0.1, 0.6);
-        applyZoom();
-    }
-
-    @FXML
-    public void menuZoomReset() {
-        currentZoom = 1.0;
-        applyZoom();
-    }
-
-    // 🔥 FIXED: Only zoom the content area, not menu bar
     private void applyZoom() {
         if (mainLayout.getCenter() != null) {
             mainLayout.getCenter().setScaleX(currentZoom);
@@ -203,85 +132,57 @@ public class MainController {
         }
     }
 
-    // ═══════════════════════════════════════════════
-    //  MENU — ABOUT
-    // ═══════════════════════════════════════════════
-    @FXML
-    public void menuAbout() {
+    @FXML public void menuAbout() {
         try {
-            java.net.URL aboutUrl = getClass().getResource(
-                    "/com/example/pr_1_file_dupe/fxml/about.fxml");
-            
+            java.net.URL aboutUrl = getClass().getResource("/com/example/pr_1_file_dupe/fxml/about.fxml");
             if (aboutUrl != null) {
-                FXMLLoader loader = new FXMLLoader(aboutUrl);
-                Parent aboutScreen = loader.load();
-                mainLayout.setCenter(aboutScreen);
+                mainLayout.setCenter(new FXMLLoader(aboutUrl).load());
             } else {
-                // Fallback to simple Alert dialog
                 Alert about = new Alert(Alert.AlertType.INFORMATION);
                 about.setTitle("About");
                 about.setHeaderText("Duplicate File Detector  v1.0");
-                about.setContentText(
-                        "A smart tool to find and remove duplicate files.\n\n" +
-                        "Built with Java 25 + JavaFX 21\n\n" +
-                        "Developers:\n" +
-                        "• Tahaur Nazrul Islam Khan\n" +
-                        "  Email: x.tahaur@gmail.com\n" +
-                        "  Phone: +91 9326964930\n\n" +
-                        "• Gupta Praveen\n" +
-                        "  Email: guptapraveen67984@gmail.com\n" +
-                        "  Phone: +91 744 753 4511");
+                about.setContentText("A smart tool to find and remove duplicate files.");
                 about.showAndWait();
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            showError("Error loading About screen: " + ex.getMessage());
-        }
+        } catch (IOException ex) { showError("Error loading About screen."); }
     }
 
-    // 🔥 FIXED: Open email client instead of browser
     @FXML
     public void menuReportBug() {
+        // 🔥 FIXED: Safe cross-platform mail handling (prevents Linux GTK crash)
         try {
-            String subject = "Bug Report - Duplicate File Detector";
-            String body = "Please describe the bug you encountered:\n\n";
-            String mailto = "mailto:x.tahaur@gmail.com,guptapraveen67984@gmail.com"
-                    + "?subject=" + java.net.URLEncoder.encode(subject, "UTF-8")
-                    + "&body=" + java.net.URLEncoder.encode(body, "UTF-8");
+            String mailto = "mailto:x.tahaur@gmail.com,guptapraveen67984@gmail.com?subject=Bug%20Report";
+            String os = System.getProperty("os.name").toLowerCase();
             
-            java.awt.Desktop.getDesktop().mail(new java.net.URI(mailto));
+            if (os.contains("win")) {
+                Runtime.getRuntime().exec("cmd /c start " + mailto);
+            } else if (os.contains("mac")) {
+                Runtime.getRuntime().exec("open " + mailto);
+            } else {
+                // Linux fallback
+                javafx.scene.input.ClipboardContent content = new javafx.scene.input.ClipboardContent();
+                content.putString("x.tahaur@gmail.com, guptapraveen67984@gmail.com");
+                javafx.scene.input.Clipboard.getSystemClipboard().setContent(content);
+                showError("Email copied to clipboard! (Direct mail opening is restricted on this OS)");
+            }
         } catch (Exception e) {
-            e.printStackTrace();
-            showError("Could not open email client. Please email us at:\nx.tahaur@gmail.com\nguptapraveen67984@gmail.com");
+            showError("Could not open email client. Please email us at:\nx.tahaur@gmail.com");
         }
     }
 
-    // ═══════════════════════════════════════════════
-    //  ACTIVE NAV HIGHLIGHT
-    // ═══════════════════════════════════════════════
     private void setActive(Button clicked) {
         if (activeButton != null) {
             activeButton.getStyleClass().remove("nav-item-active");
-            if (!activeButton.getStyleClass().contains("nav-item"))
-                activeButton.getStyleClass().add("nav-item");
+            if (!activeButton.getStyleClass().contains("nav-item")) activeButton.getStyleClass().add("nav-item");
         }
         clicked.getStyleClass().remove("nav-item");
-        if (!clicked.getStyleClass().contains("nav-item-active"))
-            clicked.getStyleClass().add("nav-item-active");
+        if (!clicked.getStyleClass().contains("nav-item-active")) clicked.getStyleClass().add("nav-item-active");
         activeButton = clicked;
     }
 
-    // ═══════════════════════════════════════════════
-    //  HELPERS
-    // ═══════════════════════════════════════════════
     private void loadScreen(String fxmlPath) {
-        try {
-            mainLayout.setCenter(
-                    new FXMLLoader(getClass().getResource(fxmlPath)).load());
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Error loading screen: " + fxmlPath);
-        }
+        try { mainLayout.setCenter(new FXMLLoader(getClass().getResource(fxmlPath)).load()); } 
+        catch (IOException e) { showError("Error loading screen: " + fxmlPath); }
     }
 
     private void showError(String msg) {

@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -7,7 +8,7 @@
     <groupId>com.example</groupId>
     <artifactId>PR_1_FILE_DUPE</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>PR_1_FILE_DUPE</name>
+    <name>DuplicateFinder</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -82,12 +83,10 @@
                 <version>0.0.8</version>
                 <executions>
                     <execution>
-                        <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.pr_1_file_dupe/com.example.pr_1_file_dupe.HelloApplication
-                            </mainClass>
-                            <launcher>app</launcher>
+                            <mainClass>com.example.pr_1_file_dupe/com.example.pr_1_file_dupe.HelloApplication</mainClass>
+                            <launcher>DuplicateFinder</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
                             <noManPages>true</noManPages>
@@ -99,4 +98,71 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>windows-installer</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>jpackage-windows</id>
+                                <phase>package</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>jpackage</executable>
+                                    <arguments>
+                                        <argument>--type</argument><argument>msi</argument>
+                                        <argument>--dest</argument><argument>target/installer</argument>
+                                        <argument>--name</argument><argument>DuplicateFinder</argument>
+                                        <argument>--module</argument><argument>com.example.pr_1_file_dupe/com.example.pr_1_file_dupe.HelloApplication</argument>
+                                        <argument>--runtime-image</argument><argument>target/app</argument>
+                                        <argument>--win-shortcut</argument>
+                                        <argument>--win-menu</argument>
+                                        <argument>--app-version</argument><argument>1.0.0</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>linux-installer</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>jpackage-linux</id>
+                                <phase>package</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>jpackage</executable>
+                                    <arguments>
+                                        <argument>--type</argument><argument>deb</argument>
+                                        <argument>--dest</argument><argument>target/installer</argument>
+                                        <argument>--name</argument><argument>duplicatefinder</argument>
+                                        <argument>--module</argument><argument>com.example.pr_1_file_dupe/com.example.pr_1_file_dupe.HelloApplication</argument>
+                                        <argument>--runtime-image</argument><argument>target/app</argument>
+                                        <argument>--linux-shortcut</argument>
+                                        <argument>--app-version</argument><argument>1.0.0</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

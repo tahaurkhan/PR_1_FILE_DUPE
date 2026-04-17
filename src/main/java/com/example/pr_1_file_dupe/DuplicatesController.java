@@ -3,7 +3,6 @@ package com.example.pr_1_file_dupe;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
-import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.VBox;
 
 import java.io.File;
@@ -35,35 +34,25 @@ public class DuplicatesController {
 
     private Map<String, List<FileData>> masterData;
 
-    private static final Set<String> IMAGE_TYPES =
-            Set.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
-    private static final Set<String> VIDEO_TYPES =
-            Set.of("mp4", "mkv", "avi", "mov", "wmv");
-    private static final Set<String> DOC_TYPES =
-            Set.of("pdf", "doc", "docx", "txt", "xlsx", "pptx", "csv");
+    private static final Set<String> IMAGE_TYPES = Set.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
+    private static final Set<String> VIDEO_TYPES = Set.of("mp4", "mkv", "avi", "mov", "wmv");
+    private static final Set<String> DOC_TYPES = Set.of("pdf", "doc", "docx", "txt", "xlsx", "pptx", "csv");
 
     @FXML
     public void exportToCSV() {
-        if (DashboardController.lastScanResults == null || DashboardController.lastScanResults.isEmpty()) {
-            return;
-        }
+        if (DashboardController.lastScanResults == null || DashboardController.lastScanResults.isEmpty()) return;
 
         javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
         fileChooser.setTitle("Save Duplicate Report");
-        
-        // 🔥 FIXED: Add timestamp to filename
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
         fileChooser.setInitialFileName("Duplicate_Scan_Report_" + timestamp + ".csv");
-        
         fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
-        
         java.io.File file = fileChooser.showSaveDialog(duplicatesTable.getScene().getWindow());
 
         if (file != null) {
             try (java.io.PrintWriter writer = new java.io.PrintWriter(file)) {
                 writer.println("Group,File Name,Size (Bytes),Path");
                 int groupNumber = 1;
-                
                 for (List<FileData> fileList : DashboardController.lastScanResults.values()) {
                     if (fileList.size() > 1) { 
                         for (FileData data : fileList) {
@@ -73,26 +62,26 @@ public class DuplicatesController {
                     }
                 }
                 new Alert(Alert.AlertType.INFORMATION, "Report saved to:\n" + file.getAbsolutePath()).showAndWait();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } catch (Exception e) { e.printStackTrace(); }
         }
     }
-    // ═══════════════════════════════════════════════
-    //  INITIALIZE
-    // ═══════════════════════════════════════════════
+
     @FXML
     public void initialize() {
-
-        // --- Column wiring ---
-        selectCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("selected"));
+        // 🔥 FIXED: Use CheckBoxTreeItem's built in boolean property to handle parent/child cascade
+        selectCol.setCellValueFactory(cellData -> {
+            TreeItem<FileData> item = cellData.getValue();
+            if (item instanceof CheckBoxTreeItem) {
+                return ((CheckBoxTreeItem<FileData>) item).selectedProperty();
+            }
+            return new javafx.beans.property.SimpleBooleanProperty(false);
+        });
         selectCol.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(selectCol));
 
-        nameCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
-        typeCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("type"));
+        nameCol.setCellValueFactory(new javafx.scene.control.cell.TreeItemPropertyValueFactory<>("name"));
+        typeCol.setCellValueFactory(new javafx.scene.control.cell.TreeItemPropertyValueFactory<>("type"));
 
-        // Size — human readable
-        sizeCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("size"));
+        sizeCol.setCellValueFactory(new javafx.scene.control.cell.TreeItemPropertyValueFactory<>("size"));
         sizeCol.setCellFactory(col -> new TreeTableCell<>() {
             @Override
             protected void updateItem(Long item, boolean empty) {
@@ -101,26 +90,21 @@ public class DuplicatesController {
             }
         });
 
-        // Path — tooltip on hover for full path
-        pathCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("path"));
+        pathCol.setCellValueFactory(new javafx.scene.control.cell.TreeItemPropertyValueFactory<>("path"));
         pathCol.setCellFactory(col -> new TreeTableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
-                    setText(null);
-                    setTooltip(null);
+                    setText(null); setTooltip(null);
                 } else {
-                    setText(item);
-                    setTooltip(new Tooltip(item));
+                    setText(item); setTooltip(new Tooltip(item));
                 }
             }
         });
 
-        // --- Sort dropdown default ---
         sortDropdown.setValue("Largest First");
 
-        // --- Filter ToggleGroup: only one active at a time ---
         ToggleGroup filterGroup = new ToggleGroup();
         filterAll.setToggleGroup(filterGroup);
         filterImages.setToggleGroup(filterGroup);
@@ -129,14 +113,11 @@ public class DuplicatesController {
         filterOthers.setToggleGroup(filterGroup);
         filterAll.setSelected(true);
 
-        // Prevent deselecting all — always keep one active
         filterGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null) oldVal.setSelected(true);
         });
 
-        // --- Load scan data ---
-        if (DashboardController.lastScanResults != null
-                && !DashboardController.lastScanResults.isEmpty()) {
+        if (DashboardController.lastScanResults != null && !DashboardController.lastScanResults.isEmpty()) {
             masterData = DashboardController.lastScanResults;
             buildTable(masterData);
         } else {
@@ -144,14 +125,11 @@ public class DuplicatesController {
         }
     }
 
-    // ═══════════════════════════════════════════════
-    //  BUILD TABLE
-    // ═══════════════════════════════════════════════
     private void buildTable(Map<String, List<FileData>> data) {
         showNoData(data == null || data.isEmpty());
         if (data == null || data.isEmpty()) return;
 
-        TreeItem<FileData> root = new TreeItem<>(new FileData("Root", "", 0, ""));
+        CheckBoxTreeItem<FileData> root = new CheckBoxTreeItem<>(new FileData("Root", "", 0, ""));
 
         long totalWasted = 0;
         int  totalFiles  = 0;
@@ -169,28 +147,23 @@ public class DuplicatesController {
             totalWasted += wastedBytes;
             totalFiles  += files.size();
 
-            // Keep the newest file unchecked (smart auto-select)
-            FileData newest = files.stream()
-                    .max(Comparator.comparingLong(
-                            f -> new File(f.getPath()).lastModified()))
-                    .orElse(files.get(0));
+            FileData newest = files.stream().max(Comparator.comparingLong(f -> new File(f.getPath()).lastModified())).orElse(files.get(0));
 
-            String groupLabel = String.format(
-                    "Group %d    (%d files)  —  %s  %s",
-                    groupNum, files.size(),
-                    formatSize(fileSize),
-                    files.get(0).getType().toUpperCase());
+            String groupLabel = String.format("Group %d    (%d files)  —  %s  %s", groupNum, files.size(), formatSize(fileSize), files.get(0).getType().toUpperCase());
+            FileData header = new FileData(groupLabel, "Group", fileSize, "Wasted: " + formatSize(wastedBytes));
 
-            FileData header = new FileData(
-                    groupLabel, "Group", fileSize,
-                    "Wasted: " + formatSize(wastedBytes));
-
-            TreeItem<FileData> groupNode = new TreeItem<>(header);
+            CheckBoxTreeItem<FileData> groupNode = new CheckBoxTreeItem<>(header);
             groupNode.setExpanded(true);
+            groupNode.setIndependent(false); // 🔥 Enables auto-cascade to children
 
             for (FileData f : files) {
-                f.setSelected(!f.getPath().equals(newest.getPath()));
-                groupNode.getChildren().add(new TreeItem<>(f));
+                CheckBoxTreeItem<FileData> childNode = new CheckBoxTreeItem<>(f);
+                childNode.setSelected(!f.getPath().equals(newest.getPath()));
+                
+                // Add listener to update selection count in real-time
+                childNode.selectedProperty().addListener((obs, oldVal, newVal) -> refreshSelectedCount());
+                
+                groupNode.getChildren().add(childNode);
             }
 
             root.getChildren().add(groupNode);
@@ -207,17 +180,9 @@ public class DuplicatesController {
         duplicatesTable.scrollTo(0);
     }
 
-    // ═══════════════════════════════════════════════
-    //  FILTER & SORT
-    // ═══════════════════════════════════════════════
-    @FXML
-    public void applyFilter() {
+    @FXML public void applyFilter() {
         if (masterData == null) return;
-
-        if (filterAll.isSelected()) {
-            buildTable(masterData);
-            return;
-        }
+        if (filterAll.isSelected()) { buildTable(masterData); return; }
 
         Map<String, List<FileData>> filtered = new LinkedHashMap<>();
         for (Map.Entry<String, List<FileData>> entry : masterData.entrySet()) {
@@ -227,42 +192,28 @@ public class DuplicatesController {
             if (filterImages.isSelected() && IMAGE_TYPES.contains(type)) keep = true;
             if (filterVideos.isSelected() && VIDEO_TYPES.contains(type)) keep = true;
             if (filterDocs.isSelected()   && DOC_TYPES.contains(type))   keep = true;
-            if (filterOthers.isSelected()
-                    && !IMAGE_TYPES.contains(type)
-                    && !VIDEO_TYPES.contains(type)
-                    && !DOC_TYPES.contains(type)) keep = true;
+            if (filterOthers.isSelected() && !IMAGE_TYPES.contains(type) && !VIDEO_TYPES.contains(type) && !DOC_TYPES.contains(type)) keep = true;
 
             if (keep) filtered.put(entry.getKey(), entry.getValue());
         }
         buildTable(filtered);
     }
 
-    @FXML
-    public void applySort() {
-        if (masterData != null) buildTable(masterData);
-    }
+    @FXML public void applySort() { if (masterData != null) buildTable(masterData); }
 
     private void sortEntries(List<Map.Entry<String, List<FileData>>> entries) {
         String sort = sortDropdown.getValue();
         if (sort == null) return;
         switch (sort) {
-            case "Largest First"  -> entries.sort((a, b) ->
-                    Long.compare(b.getValue().get(0).getSize(),
-                                 a.getValue().get(0).getSize()));
-            case "Smallest First" -> entries.sort(Comparator.comparingLong(
-                    e -> e.getValue().get(0).getSize()));
-            case "Most Copies"    -> entries.sort((a, b) ->
-                    Integer.compare(b.getValue().size(), a.getValue().size()));
-            case "File Name A-Z"  -> entries.sort(Comparator.comparing(
-                    e -> e.getValue().get(0).getName()));
+            case "Largest First"  -> entries.sort((a, b) -> Long.compare(b.getValue().get(0).getSize(), a.getValue().get(0).getSize()));
+            case "Smallest First" -> entries.sort(Comparator.comparingLong(e -> e.getValue().get(0).getSize()));
+            case "Most Copies"    -> entries.sort((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()));
+            case "File Name A-Z"  -> entries.sort(Comparator.comparing(e -> e.getValue().get(0).getName()));
         }
     }
 
-    // ═══════════════════════════════════════════════
-    //  SELECTION HELPERS
-    // ═══════════════════════════════════════════════
-    @FXML public void selectAll()  { forEachFile(f -> f.setSelected(true));  refreshSelectedCount(); }
-    @FXML public void selectNone() { forEachFile(f -> f.setSelected(false)); refreshSelectedCount(); }
+    @FXML public void selectAll() { forEachFile(n -> n.setSelected(true)); refreshSelectedCount(); }
+    @FXML public void selectNone() { forEachFile(n -> n.setSelected(false)); refreshSelectedCount(); }
 
     @FXML
     public void selectAllButFirst() {
@@ -271,19 +222,19 @@ public class DuplicatesController {
         for (TreeItem<FileData> group : root.getChildren()) {
             boolean first = true;
             for (TreeItem<FileData> node : group.getChildren()) {
-                node.getValue().setSelected(!first);
+                ((CheckBoxTreeItem<FileData>)node).setSelected(!first);
                 first = false;
             }
         }
         refreshSelectedCount();
     }
 
-    private void forEachFile(java.util.function.Consumer<FileData> action) {
+    private void forEachFile(java.util.function.Consumer<CheckBoxTreeItem<FileData>> action) {
         TreeItem<FileData> root = duplicatesTable.getRoot();
         if (root == null) return;
         for (TreeItem<FileData> group : root.getChildren())
             for (TreeItem<FileData> node  : group.getChildren())
-                action.accept(node.getValue());
+                action.accept((CheckBoxTreeItem<FileData>) node);
     }
 
     private void refreshSelectedCount() {
@@ -292,13 +243,10 @@ public class DuplicatesController {
         if (root != null)
             for (TreeItem<FileData> g : root.getChildren())
                 for (TreeItem<FileData> n : g.getChildren())
-                    if (n.getValue().isSelected()) count++;
+                    if (((CheckBoxTreeItem<FileData>)n).isSelected()) count++;
         selectedCountLabel.setText(count + " files selected");
     }
 
-    // ═══════════════════════════════════════════════
-    //  DELETE
-    // ═══════════════════════════════════════════════
     @FXML
     public void deleteSelected() {
         TreeItem<FileData> root = duplicatesTable.getRoot();
@@ -312,23 +260,20 @@ public class DuplicatesController {
         for (TreeItem<FileData> group : root.getChildren()) {
             for (TreeItem<FileData> node : group.getChildren()) {
                 FileData f = node.getValue();
-
-                if (f.isSelected() && !f.getType().equals("Group")) {
+                
+                // Read from CheckBoxTreeItem state instead of FileData
+                if (((CheckBoxTreeItem<FileData>)node).isSelected() && !f.getType().equals("Group")) {
                     File target = new File(f.getPath());
                     boolean success = false;
 
                     if (target.exists()) {
                         try {
-                            if (java.awt.Desktop.isDesktopSupported()
-                                    && java.awt.Desktop.getDesktop().isSupported(
-                                            java.awt.Desktop.Action.MOVE_TO_TRASH)) {
+                            if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.MOVE_TO_TRASH)) {
                                 success = java.awt.Desktop.getDesktop().moveToTrash(target);
                             } else {
                                 success = target.delete();
                             }
-                        } catch (Exception e) {
-                            System.out.println("Trash error: " + e.getMessage());
-                        }
+                        } catch (Exception e) { System.out.println("Trash error: " + e.getMessage()); }
 
                         if (success) {
                             totalSize += f.getSize();
@@ -341,18 +286,12 @@ public class DuplicatesController {
             }
         }
 
-        // Remove from UI
         toRemove.forEach(n -> n.getParent().getChildren().remove(n));
-
-        root.getChildren().stream()
-                .filter(g -> g.getChildren().size() <= 1)
-                .forEach(emptyGroups::add);
+        root.getChildren().stream().filter(g -> g.getChildren().size() <= 1).forEach(emptyGroups::add);
         root.getChildren().removeAll(emptyGroups);
 
-        // Persist stats
         new DataStore().updateStats(totalSize, emptyGroups.size(), 0);
 
-        // Refresh header chips with remaining totals
         long remainingWaste = 0;
         int  remainingFiles = 0;
         for (TreeItem<FileData> g : root.getChildren())
@@ -366,14 +305,9 @@ public class DuplicatesController {
 
         refreshSelectedCount();
 
-        new Alert(Alert.AlertType.INFORMATION, "Moved " + deleted
-                + " files to Trash (" + formatSize(totalSize) + " reclaimed).")
-                .showAndWait();
+        new Alert(Alert.AlertType.INFORMATION, "Moved " + deleted + " files to Trash (" + formatSize(totalSize) + " reclaimed).").showAndWait();
     }
 
-    // ═══════════════════════════════════════════════
-    //  UTILITIES
-    // ═══════════════════════════════════════════════
     private void showNoData(boolean show) {
         noDataPane.setVisible(show);
         noDataPane.setManaged(show);
@@ -382,10 +316,8 @@ public class DuplicatesController {
     }
 
     private String formatSize(long bytes) {
-        if (bytes >= 1024L * 1024 * 1024)
-            return String.format("%.1f GB", bytes / (1024.0 * 1024 * 1024));
-        if (bytes >= 1024 * 1024)
-            return String.format("%.1f MB", bytes / (1024.0 * 1024));
+        if (bytes >= 1024L * 1024 * 1024) return String.format("%.1f GB", bytes / (1024.0 * 1024 * 1024));
+        if (bytes >= 1024 * 1024) return String.format("%.1f MB", bytes / (1024.0 * 1024));
         return String.format("%.1f KB", bytes / 1024.0);
     }
 }

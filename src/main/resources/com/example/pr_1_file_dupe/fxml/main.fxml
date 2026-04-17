@@ -10,140 +10,79 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.pr_1_file_dupe.MainController">
 
-    <!-- ══ MENU BAR ══ -->
     <top>
-        <MenuBar fx:id="menuBar" style="-fx-background-color: #f0f4f3;">
+        <MenuBar fx:id="menuBar">
 
-            <!-- File Menu (Alt+F) -->
             <Menu mnemonicParsing="true" text="_File">
                 <items>
-                    <MenuItem text="Open Folder..."
-                              onAction="#menuOpenFolder"
-                              accelerator="CTRL+O" />
-                    <MenuItem text="New Scan"
-                              onAction="#menuNewScan"
-                              accelerator="CTRL+N" />
+                    <MenuItem text="Open Folder..." onAction="#menuOpenFolder" accelerator="CTRL+O" />
+                    <MenuItem text="New Scan" onAction="#menuNewScan" accelerator="CTRL+N" />
                     <SeparatorMenuItem />
-                    <MenuItem text="Quit"
-                              onAction="#menuQuit"
-                              accelerator="CTRL+Q" />
+                    <MenuItem text="Quit" onAction="#menuQuit" accelerator="CTRL+Q" />
                 </items>
             </Menu>
 
-            <!-- Edit Menu (Alt+E) -->
             <Menu mnemonicParsing="true" text="_Edit">
                 <items>
-                    <MenuItem text="Select All Duplicates"
-                              onAction="#menuSelectAll"
-                              accelerator="CTRL+A" />
-                    <MenuItem text="Deselect All"
-                              onAction="#menuDeselectAll"
-                              accelerator="CTRL+D" />
+                    <MenuItem text="Select All Duplicates" onAction="#menuSelectAll" accelerator="CTRL+A" />
+                    <MenuItem text="Deselect All" onAction="#menuDeselectAll" accelerator="CTRL+D" />
                     <SeparatorMenuItem />
-                    <MenuItem text="Delete Selected"
-                              onAction="#menuDeleteSelected"
-                              accelerator="DELETE" />
+                    <MenuItem text="Delete Selected" onAction="#menuDeleteSelected" accelerator="DELETE" />
                 </items>
             </Menu>
 
-            <!-- View Menu (Alt+V) -->
             <Menu mnemonicParsing="true" text="_View">
                 <items>
-                    <MenuItem text="Zoom In"
-                              onAction="#menuZoomIn"
-                              accelerator="CTRL+EQUALS" />
-                    <MenuItem text="Zoom Out"
-                              onAction="#menuZoomOut"
-                              accelerator="CTRL+MINUS" />
-                    <MenuItem text="Reset Zoom"
-                              onAction="#menuZoomReset"
-                              accelerator="CTRL+0" />
+                    <MenuItem text="Zoom In" onAction="#menuZoomIn" accelerator="CTRL+EQUALS" />
+                    <MenuItem text="Zoom Out" onAction="#menuZoomOut" accelerator="CTRL+MINUS" />
+                    <MenuItem text="Reset Zoom" onAction="#menuZoomReset" accelerator="CTRL+0" />
                     <SeparatorMenuItem />
-                    <MenuItem text="Toggle Sidebar"
-                              onAction="#toggleSidebar"
-                              accelerator="CTRL+B" />
+                    <MenuItem text="Toggle Sidebar" onAction="#toggleSidebar" accelerator="CTRL+B" />
                 </items>
             </Menu>
 
-            <!-- Settings Menu (Alt+S) - NEW -->
             <Menu mnemonicParsing="true" text="_Settings">
                 <items>
-                    <MenuItem text="Preferences..."
-                              onAction="#openSetting"
-                              accelerator="CTRL+COMMA" />
+                    <MenuItem text="Preferences..." onAction="#openSetting" accelerator="CTRL+COMMA" />
                 </items>
             </Menu>
 
-            <!-- About Menu (Alt+A) -->
             <Menu mnemonicParsing="true" text="_About">
                 <items>
-                    <MenuItem text="About Duplicate Finder"
-                              onAction="#menuAbout" />
-                    <MenuItem text="Report a Bug"
-                              onAction="#menuReportBug" />
+                    <MenuItem text="About Duplicate Finder" onAction="#menuAbout" />
+                    <MenuItem text="Report a Bug" onAction="#menuReportBug" />
                 </items>
             </Menu>
 
         </MenuBar>
     </top>
 
-    <!-- ══ SIDEBAR ══ -->
     <left>
-        <VBox fx:id="sidebarPane" spacing="6"
-              style="-fx-background-color: #f0f4f3; -fx-pref-width: 170px;"
-              BorderPane.alignment="CENTER">
+        <VBox fx:id="sidebarPane" spacing="6" prefWidth="170.0" BorderPane.alignment="CENTER">
 
             <padding>
                 <Insets bottom="16" left="10" right="10" top="12"/>
             </padding>
 
-            <!-- Hamburger -->
             <Button fx:id="hamburgerBtn"
                     onAction="#toggleSidebar"
                     text="☰"
-                    style="-fx-background-color: transparent; -fx-font-size: 18px;
-                           -fx-cursor: hand; -fx-padding: 4 8;"
+                    style="-fx-background-color: transparent; -fx-font-size: 18px; -fx-cursor: hand; -fx-padding: 4 8;"
                     maxWidth="Infinity" />
 
             <Separator style="-fx-padding: 4 0;" />
 
-            <Button fx:id="btnFiles"
-                    maxWidth="Infinity"
-                    onAction="#showFiles"
-                    styleClass="nav-item"
-                    text="🗂  Files" />
-
-            <Button fx:id="btnDuplicates"
-                    maxWidth="Infinity"
-                    onAction="#showDuplicates"
-                    styleClass="nav-item"
-                    text="🔁  Duplicates" />
-
-            <Button fx:id="btnCategories"
-                    maxWidth="Infinity"
-                    onAction="#showCategories"
-                    styleClass="nav-item"
-                    text="📊  Categories" />
-
-            <Button fx:id="btnRecovery"
-                    maxWidth="Infinity"
-                    onAction="#showRecovery"
-                    styleClass="nav-item"
-                    text="♻  Recovery" />
-
-            <Button fx:id="btnSettings"
-                    maxWidth="Infinity"
-                    onAction="#openSetting"
-                    styleClass="nav-item"
-                    text="⚙  Settings" />
+            <Button fx:id="btnFiles" maxWidth="Infinity" onAction="#showFiles" styleClass="nav-item" text="🗂  Files" />
+            <Button fx:id="btnDuplicates" maxWidth="Infinity" onAction="#showDuplicates" styleClass="nav-item" text="🔁  Duplicates" />
+            <Button fx:id="btnCategories" maxWidth="Infinity" onAction="#showCategories" styleClass="nav-item" text="📊  Categories" />
+            <Button fx:id="btnRecovery" maxWidth="Infinity" onAction="#showRecovery" styleClass="nav-item" text="♻  Recovery" />
+            <Button fx:id="btnSettings" maxWidth="Infinity" onAction="#openSetting" styleClass="nav-item" text="⚙  Settings" />
         </VBox>
     </left>
 
-    <!-- ══ CONTENT AREA ══ -->
     <center>
         <StackPane fx:id="contentPane" BorderPane.alignment="CENTER">
-            <Label text="Welcome to Duplicate Finder. Select an option from the sidebar."
-                   style="-fx-font-size: 18px; -fx-text-fill: #7f8c8d;" />
+            <Label text="Welcome to Duplicate Finder. Select an option from the sidebar." style="-fx-font-size: 18px; -fx-text-fill: #7f8c8d;" />
         </StackPane>
     </center>
 
