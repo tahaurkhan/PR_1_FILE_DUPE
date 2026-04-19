@@ -1,6 +1,7 @@
 package com.example.pr_1_file_dupe;
 
-import com.example.pr_1_file_dupe.service.FileScanner;
+import com.example.pr_1_file_dupe.service.EnhancedFileScanner;
+import com.example.pr_1_file_dupe.utils.SoundManager;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +14,10 @@ import javafx.scene.layout.VBox;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Enhanced DashboardController with Sound Effects
+ * Integrates EnhancedFileScanner and SoundManager
+ */
 public class DashboardController {
 
     @FXML private TextField pathInputField;
@@ -29,18 +34,21 @@ public class DashboardController {
     public void initialize() {
         DataStore store = new DataStore();
 
-        // ✅ Load and display saved folder path
+        // Load sounds based on user preference
+        SoundManager.setSoundEnabled(store.isSoundEnabled());
+        SoundManager.setVolume(store.getSoundVolume());
+
+        // Load and display saved folder path
         String lastFolder = store.getLastFolder();
         if (lastFolder != null && !lastFolder.isEmpty()) {
             pathInputField.setText(lastFolder);
         }
 
-        // ✅ Add tooltip that shows full path on hover after 1 second
+        // Add tooltip
         pathTooltip = new Tooltip();
         pathTooltip.setShowDelay(javafx.util.Duration.seconds(1));
         Tooltip.install(pathInputField, pathTooltip);
         
-        // Update tooltip text whenever path changes
         pathInputField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && !newVal.isEmpty()) {
                 pathTooltip.setText(newVal);
@@ -62,10 +70,12 @@ public class DashboardController {
 
     @FXML
     public void browseFolder() {
+        // Play navigation sound
+        SoundManager.playAsync(SoundManager.Sound.BUTTON_CLICK);
+
         javafx.stage.DirectoryChooser chooser = new javafx.stage.DirectoryChooser();
         chooser.setTitle("Select Folder to Scan");
         
-        // ✅ Start from last used folder if available
         DataStore store = new DataStore();
         String lastFolder = store.getLastFolder();
         if (lastFolder != null && !lastFolder.isEmpty()) {
@@ -82,8 +92,10 @@ public class DashboardController {
         java.io.File selected = chooser.showDialog(pathInputField.getScene().getWindow());
         if (selected != null) {
             pathInputField.setText(selected.getAbsolutePath());
-            // ✅ Save the selected folder path
             store.setLastFolder(selected.getAbsolutePath());
+            
+            // Play success sound
+            SoundManager.playAsync(SoundManager.Sound.SUCCESS);
         }
     }
 
@@ -92,6 +104,9 @@ public class DashboardController {
         String targetFolder = pathInputField.getText();
 
         if (targetFolder == null || targetFolder.trim().isEmpty()) {
+            // Play error sound
+            SoundManager.playAsync(SoundManager.Sound.ERROR);
+            
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("No Path");
             alert.setHeaderText(null);
@@ -100,18 +115,28 @@ public class DashboardController {
             return;
         }
 
-        // ✅ Save the folder path before scanning
+        // Play scan start sound
+        SoundManager.playAsync(SoundManager.Sound.SCAN_START);
+
         new DataStore().setLastFolder(targetFolder);
 
         loadingBox.setVisible(true);
         scanButton.setDisable(true);
-        System.out.println("Initializing scanner for: " + targetFolder);
+        System.out.println("🔍 Initializing enhanced scanner for: " + targetFolder);
 
         Task<Map<String, List<FileData>>> scanTask = new Task<>() {
             @Override
             protected Map<String, List<FileData>> call() throws Exception {
-                FileScanner scanner = new FileScanner();
+                // Use EnhancedFileScanner instead of FileScanner
+                EnhancedFileScanner scanner = new EnhancedFileScanner();
                 List<FileData> scannedFiles = scanner.scanDirectory(targetFolder);
+                
+                // Log scan statistics
+                System.out.println("═══ ENHANCED SCAN STATS ═══");
+                System.out.println("System files protected: " + scanner.getSystemFilesSkipped());
+                System.out.println("Locked files skipped: " + scanner.getLockedFilesSkipped());
+                System.out.println("Total files scanned: " + scannedFiles.size());
+                
                 return new DuplicateFinder().findDuplicates(scannedFiles);
             }
         };
@@ -120,19 +145,21 @@ public class DashboardController {
             Map<String, List<FileData>> duplicates = scanTask.getValue();
             lastScanResults = duplicates;
 
-            // ✅ Save real scanned file count
+            // Save stats
             int totalFiles = duplicates.values().stream()
                     .mapToInt(List::size).sum();
             new DataStore().updateStats(0, duplicates.size(), totalFiles);
 
-            // ✅ Refresh stat cards immediately
+            // Refresh stat cards
             initialize();
 
             loadingBox.setVisible(false);
             scanButton.setDisable(false);
 
+            // Play scan complete sound
+            SoundManager.playAsync(SoundManager.Sound.SCAN_COMPLETE);
+
             try {
-                // 🔥 FIXED: Load dupelicate.fxml instead of results.fxml
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(
                         "/com/example/pr_1_file_dupe/fxml/dupelicate.fxml"));
                 Parent duplicatesScreen = loader.load();
@@ -140,15 +167,18 @@ public class DashboardController {
                 BorderPane mainLayout = (BorderPane) pathInputField.getScene().getRoot();
                 mainLayout.setCenter(duplicatesScreen);
 
-                // 🔥 Show completion message
+                // Show completion message
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Scan Complete");
                 alert.setHeaderText(null);
-                alert.setContentText("Found " + duplicates.size() + " duplicate groups with " + totalFiles + " total files.");
+                alert.setContentText("✓ Found " + duplicates.size() + " duplicate groups\n" +
+                                   "📁 Total files: " + totalFiles + "\n" +
+                                   "🛡️ System files protected");
                 alert.showAndWait();
 
             } catch (Exception ex) {
                 ex.printStackTrace();
+                SoundManager.playAsync(SoundManager.Sound.ERROR);
                 new Alert(Alert.AlertType.ERROR, "Could not load duplicates view: "
                         + ex.getMessage()).showAndWait();
             }
@@ -157,6 +187,10 @@ public class DashboardController {
         scanTask.setOnFailed(e -> {
             loadingBox.setVisible(false);
             scanButton.setDisable(false);
+            
+            // Play error sound
+            SoundManager.playAsync(SoundManager.Sound.ERROR);
+            
             new Alert(Alert.AlertType.ERROR, "Scan failed: "
                     + scanTask.getException().getMessage()).showAndWait();
         });

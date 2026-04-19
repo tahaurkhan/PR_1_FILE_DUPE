@@ -2,14 +2,22 @@ package com.example.pr_1_file_dupe.service;
 
 import com.example.pr_1_file_dupe.DataStore;
 import com.example.pr_1_file_dupe.FileData;
+import com.example.pr_1_file_dupe.utils.SystemFileFilter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileScanner {
+/**
+ * Enhanced FileScanner with System File Protection
+ * - Skips Windows/Linux system directories
+ * - Detects and skips locked files
+ * - Faster and safer for system-wide scans
+ */
+public class EnhancedFileScanner {
 
-    // Variable to track skipped files
     private int skippedCount = 0;
+    private int systemFilesSkipped = 0;
+    private int lockedFilesSkipped = 0;
 
     public List<FileData> scanDirectory(String path) {
         List<FileData> fileList = new ArrayList<>();
@@ -20,61 +28,45 @@ public class FileScanner {
             return fileList;
         }
 
-        // 1. Load User Preferences ONLY ONCE at the start of the scan
+        // Load User Preferences
         DataStore store = new DataStore();
         boolean skipHidden = store.isSkipHidden();
-        long minSizeInBytes = store.getMinFileSizeKB() * 1024; // Convert KB to Bytes
+        boolean skipSystemFiles = store.isSkipSystemFiles(); // NEW SETTING
+        long minSizeInBytes = store.getMinFileSizeKB() * 1024;
 
-        // 2. Start the fast recursive scan
-        scanRecursive(root, fileList, skipHidden, minSizeInBytes);
+        // Reset counters
+        skippedCount = 0;
+        systemFilesSkipped = 0;
+        lockedFilesSkipped = 0;
+
+        // Start scan
+        System.out.println("🔍 Starting enhanced scan with system protection...");
+        scanRecursive(root, fileList, skipHidden, skipSystemFiles, minSizeInBytes);
         
-        System.out.println("--- SCAN SUMMARY ---");
-        System.out.println("Files successfully read: " + fileList.size());
-        System.out.println("Files skipped (due to settings/permissions): " + skippedCount);
+        System.out.println("\n═══ SCAN SUMMARY ═══");
+        System.out.println("✓ Files successfully read: " + fileList.size());
+        System.out.println("⊘ System files skipped: " + systemFilesSkipped);
+        System.out.println("🔒 Locked files skipped: " + lockedFilesSkipped);
+        System.out.println("⚙ Other files skipped: " + (skippedCount - systemFilesSkipped - lockedFilesSkipped));
+        System.out.println("═══════════════════════\n");
         
         return fileList;
     }
 
-    private void scanRecursive(File folder, List<FileData> fileList, boolean skipHidden, long minSizeInBytes) {
-        File[] files = folder.listFiles();
-        
-        // If files is null, it means we don't have permission to read this folder
-        if (files == null) {
-            skippedCount++;
-            return;
-        }
-
-        for (File file : files) {
-            // Rule 1: Skip hidden files
-            if (skipHidden && file.isHidden()) {
-                skippedCount++;
-                continue; 
-            }
-
-            if (file.isDirectory()) {
-                // If it's a folder, dive into it
-                scanRecursive(file, fileList, skipHidden, minSizeInBytes);
-            } else {
-                long size = file.length();
-                
-                // Rule 2: Skip files smaller than minimum limit
-                if (size < minSizeInBytes) {
-                    skippedCount++;
-                    continue;
-                }
-
-                String name = file.getName();
-                String fullPath = file.getAbsolutePath();
-                String type = getFileExtension(name);
-
-                fileList.add(new FileData(name, type, size, fullPath));
-            }
-        }
-    }
- // UPGRADED: Crash-proof recursive scanner
-    private void scanRecursive1(File folder, List<FileData> fileList, boolean skipHidden, long minSizeInBytes) {
+    /**
+     * Recursive scanner with enhanced protection
+     */
+    private void scanRecursive(File folder, List<FileData> fileList, 
+                               boolean skipHidden, boolean skipSystemFiles, 
+                               long minSizeInBytes) {
         try {
-            // NEW DEFENSE 1: Prevent infinite loops from Linux Symlinks
+            // DEFENSE 1: Skip system directories immediately
+            if (skipSystemFiles && SystemFileFilter.isSystemFile(folder)) {
+                systemFilesSkipped++;
+                return;
+            }
+
+            // DEFENSE 2: Prevent infinite loops from symlinks
             if (java.nio.file.Files.isSymbolicLink(folder.toPath())) {
                 skippedCount++;
                 return;
@@ -82,7 +74,7 @@ public class FileScanner {
 
             File[] files = folder.listFiles();
             
-            // NEW DEFENSE 2: If files is null, the OS blocked us (Permission Denied)
+            // DEFENSE 3: Permission denied protection
             if (files == null) {
                 skippedCount++;
                 return;
@@ -90,19 +82,31 @@ public class FileScanner {
 
             for (File file : files) {
                 try {
-                    // Rule 1: Skip hidden files
+                    // Skip hidden files if enabled
                     if (skipHidden && file.isHidden()) {
                         skippedCount++;
                         continue; 
                     }
 
+                    // Skip system files if enabled (NEW)
+                    if (skipSystemFiles && SystemFileFilter.isSystemFile(file)) {
+                        systemFilesSkipped++;
+                        continue;
+                    }
+
                     if (file.isDirectory()) {
-                        // Dive into the next folder
-                        scanRecursive(file, fileList, skipHidden, minSizeInBytes);
+                        // Recursively scan subdirectories
+                        scanRecursive(file, fileList, skipHidden, skipSystemFiles, minSizeInBytes);
                     } else {
+                        // Skip locked files (NEW)
+                        if (SystemFileFilter.isFileLocked(file)) {
+                            lockedFilesSkipped++;
+                            continue;
+                        }
+
                         long size = file.length();
                         
-                        // Rule 2: Skip files smaller than minimum limit
+                        // Skip files smaller than minimum limit
                         if (size < minSizeInBytes) {
                             skippedCount++;
                             continue;
@@ -114,19 +118,30 @@ public class FileScanner {
 
                         fileList.add(new FileData(name, type, size, fullPath));
                     }
-                // NEW DEFENSE 3: Catch any file-specific security lockouts
+
                 } catch (SecurityException se) {
+                    // File-specific security lockout
                     skippedCount++;
                 }
             }
-        // NEW DEFENSE 4: Catch any catastrophic folder read errors so the survives
+
         } catch (Exception e) {
-            System.out.println("Skipped unreadable system folder: " + folder.getAbsolutePath());
+            // Folder-level error protection
+            System.out.println("⚠ Skipped protected folder: " + folder.getAbsolutePath());
             skippedCount++;
         }
     }
+
     public int getSkippedCount() {
         return skippedCount;
+    }
+
+    public int getSystemFilesSkipped() {
+        return systemFilesSkipped;
+    }
+
+    public int getLockedFilesSkipped() {
+        return lockedFilesSkipped;
     }
 
     private String getFileExtension(String fileName) {
@@ -136,4 +151,4 @@ public class FileScanner {
         }
         return fileName.substring(lastDotIndex + 1);
     }
-} 
+}
