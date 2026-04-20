@@ -29,18 +29,17 @@ public class DashboardController {
     public void initialize() {
         DataStore store = new DataStore();
 
-        // ✅ Load and display saved folder path
+        // Load and display saved folder path
         String lastFolder = store.getLastFolder();
         if (lastFolder != null && !lastFolder.isEmpty()) {
             pathInputField.setText(lastFolder);
         }
 
-        // ✅ Add tooltip that shows full path on hover after 1 second
+        // Add tooltip
         pathTooltip = new Tooltip();
         pathTooltip.setShowDelay(javafx.util.Duration.seconds(1));
         Tooltip.install(pathInputField, pathTooltip);
         
-        // Update tooltip text whenever path changes
         pathInputField.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && !newVal.isEmpty()) {
                 pathTooltip.setText(newVal);
@@ -65,7 +64,6 @@ public class DashboardController {
         javafx.stage.DirectoryChooser chooser = new javafx.stage.DirectoryChooser();
         chooser.setTitle("Select Folder to Scan");
         
-        // ✅ Start from last used folder if available
         DataStore store = new DataStore();
         String lastFolder = store.getLastFolder();
         if (lastFolder != null && !lastFolder.isEmpty()) {
@@ -82,7 +80,6 @@ public class DashboardController {
         java.io.File selected = chooser.showDialog(pathInputField.getScene().getWindow());
         if (selected != null) {
             pathInputField.setText(selected.getAbsolutePath());
-            // ✅ Save the selected folder path
             store.setLastFolder(selected.getAbsolutePath());
         }
     }
@@ -100,12 +97,11 @@ public class DashboardController {
             return;
         }
 
-        // ✅ Save the folder path before scanning
         new DataStore().setLastFolder(targetFolder);
 
         loadingBox.setVisible(true);
         scanButton.setDisable(true);
-        System.out.println("Initializing scanner for: " + targetFolder);
+        System.out.println("🔍 Initializing scanner for: " + targetFolder);
 
         Task<Map<String, List<FileData>>> scanTask = new Task<>() {
             @Override
@@ -116,23 +112,58 @@ public class DashboardController {
             }
         };
 
+        scanTask.setOnSucceeded(e -> handleScanSuccess(scanTask));
+        scanTask.setOnFailed(e -> handleScanFailure(scanTask));
+
+        Thread t = new Thread(scanTask);
+        t.setDaemon(true);
+        t.start();
+    }
+
+    @FXML
+    public void startFullSystemScan(ActionEvent event) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Full System Scan");
+        confirm.setHeaderText("Scan All Drives?");
+        confirm.setContentText(
+            "This will scan ALL accessible files on your computer.\n\n" +
+            "• First scan: 10-30 minutes (builds hash cache)\n" +
+            "• Next scans: MUCH faster (uses cached hashes)\n" +
+            "• Skips system folders and locked files\n\n" +
+            "Continue?"
+        );
+        
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
+        
+        loadingBox.setVisible(true);
+        scanButton.setDisable(true);
+        System.out.println("🌐 Initializing FULL SYSTEM scan...");
+
+        Task<Map<String, List<FileData>>> scanTask = new Task<>() {
+            @Override
+            protected Map<String, List<FileData>> call() throws Exception {
+                FileScanner scanner = new FileScanner();
+                List<FileData> scannedFiles = scanner.scanFullSystem();
+                return new DuplicateFinder().findDuplicates(scannedFiles);
+            }
+        };
+
         scanTask.setOnSucceeded(e -> {
             Map<String, List<FileData>> duplicates = scanTask.getValue();
             lastScanResults = duplicates;
 
-            // ✅ Save real scanned file count
             int totalFiles = duplicates.values().stream()
                     .mapToInt(List::size).sum();
             new DataStore().updateStats(0, duplicates.size(), totalFiles);
 
-            // ✅ Refresh stat cards immediately
             initialize();
 
             loadingBox.setVisible(false);
             scanButton.setDisable(false);
 
             try {
-                // 🔥 FIXED: Load dupelicate.fxml instead of results.fxml
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(
                         "/com/example/pr_1_file_dupe/fxml/dupelicate.fxml"));
                 Parent duplicatesScreen = loader.load();
@@ -140,29 +171,73 @@ public class DashboardController {
                 BorderPane mainLayout = (BorderPane) pathInputField.getScene().getRoot();
                 mainLayout.setCenter(duplicatesScreen);
 
-                // 🔥 Show completion message
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Scan Complete");
-                alert.setHeaderText(null);
-                alert.setContentText("Found " + duplicates.size() + " duplicate groups with " + totalFiles + " total files.");
+                alert.setTitle("System Scan Complete");
+                alert.setHeaderText("✅ Full system scan complete!");
+                alert.setContentText(
+                    "Found " + duplicates.size() + " duplicate groups\n" +
+                    "Total files: " + totalFiles + "\n\n" +
+                    "💡 Next scan will be MUCH faster!"
+                );
                 alert.showAndWait();
 
             } catch (Exception ex) {
                 ex.printStackTrace();
-                new Alert(Alert.AlertType.ERROR, "Could not load duplicates view: "
-                        + ex.getMessage()).showAndWait();
+                new Alert(Alert.AlertType.ERROR, 
+                    "Could not load results: " + ex.getMessage()).showAndWait();
             }
         });
 
-        scanTask.setOnFailed(e -> {
-            loadingBox.setVisible(false);
-            scanButton.setDisable(false);
-            new Alert(Alert.AlertType.ERROR, "Scan failed: "
-                    + scanTask.getException().getMessage()).showAndWait();
-        });
+        scanTask.setOnFailed(e -> handleScanFailure(scanTask));
 
         Thread t = new Thread(scanTask);
         t.setDaemon(true);
         t.start();
+    }
+
+    private void handleScanSuccess(Task<Map<String, List<FileData>>> scanTask) {
+        Map<String, List<FileData>> duplicates = scanTask.getValue();
+        lastScanResults = duplicates;
+
+        int totalFiles = duplicates.values().stream()
+                .mapToInt(List::size).sum();
+        new DataStore().updateStats(0, duplicates.size(), totalFiles);
+
+        initialize();
+
+        loadingBox.setVisible(false);
+        scanButton.setDisable(false);
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                    "/com/example/pr_1_file_dupe/fxml/dupelicate.fxml"));
+            Parent duplicatesScreen = loader.load();
+
+            BorderPane mainLayout = (BorderPane) pathInputField.getScene().getRoot();
+            mainLayout.setCenter(duplicatesScreen);
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Scan Complete");
+            alert.setHeaderText(null);
+            alert.setContentText("Found " + duplicates.size() + 
+                " duplicate groups with " + totalFiles + " total files.");
+            alert.showAndWait();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, 
+                "Could not load duplicates view: " + ex.getMessage()).showAndWait();
+        }
+    }
+
+    private void handleScanFailure(Task<Map<String, List<FileData>>> scanTask) {
+        loadingBox.setVisible(false);
+        scanButton.setDisable(false);
+        
+        Throwable ex = scanTask.getException();
+        ex.printStackTrace();
+        
+        new Alert(Alert.AlertType.ERROR, 
+            "Scan failed: " + ex.getMessage()).showAndWait();
     }
 }

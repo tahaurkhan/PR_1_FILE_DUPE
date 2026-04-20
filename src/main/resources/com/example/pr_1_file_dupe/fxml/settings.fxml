@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import java.lang.String?>
 <?import javafx.collections.FXCollections?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
 <ScrollPane fitToWidth="true" 
             style="-fx-background: #f8fcfd; -fx-background-color: transparent;" 
@@ -23,12 +16,16 @@
               style="-fx-padding: 40px; -fx-background-color: #f8fcfd;">
             
             <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" 
-                   text="Scan Preferences" />
+                   text="Application Settings" />
             <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" 
-                   text="Customize how the engine searches for duplicate files." />
+                   text="Customize scan behavior, appearance, and protection settings" />
 
+            <!-- SCAN SETTINGS -->
             <VBox spacing="20.0" 
                   style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                
+                <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" 
+                       text="🔍 Scan Settings" />
                 
                 <VBox spacing="10.0">
                     <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" 
@@ -45,9 +42,20 @@
                     </ComboBox>
                 </VBox>
 
-                <VBox spacing="10.0" style="-fx-padding: 20 0 0 0;">
-                    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Exclusions &amp; Filters" />
-                    <CheckBox fx:id="skipHiddenCheckbox" style="-fx-font-size: 14px;" text="Skip hidden system files (Recommended)" />
+                <VBox spacing="10.0" style="-fx-padding: 10 0 0 0;">
+                    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" 
+                           text="File Filters" />
+                    <CheckBox fx:id="skipHiddenCheckbox" 
+                              style="-fx-font-size: 14px;" 
+                              text="Skip hidden files (Recommended)" />
+                    
+                    <!-- NEW: System File Protection -->
+                    <CheckBox fx:id="skipSystemFilesCheckbox" 
+                              style="-fx-font-size: 14px;" 
+                              text="Skip system files and folders (Windows/Linux protection) ✨" />
+                    <Label wrapText="true"
+                           style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px; -fx-padding: 0 0 0 25;"
+                           text="Protects critical OS directories like /System, C:\Windows, Program Files, etc." />
                     
                     <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-padding: 10 0 0 0;">
                         <Label style="-fx-font-size: 14px;" text="Ignore files smaller than:" />
@@ -55,42 +63,88 @@
                         <Label style="-fx-font-size: 14px;" text="KB" />
                     </HBox>
                 </VBox>
-
-                <VBox spacing="10" style="-fx-padding: 20 0 0 0;">
-                    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Appearance" />
-                    <HBox alignment="CENTER_LEFT" spacing="16">
-                        <VBox>
-                            <Label style="-fx-font-size: 14px;" text="Dark Mode" />
-                            <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"
-                                   text="Switch between light and dark theme" />
-                        </VBox>
-                        <HBox HBox.hgrow="ALWAYS"/>
-                        <ToggleButton fx:id="darkThemeToggle"
-                                      style="-fx-background-radius: 20; -fx-padding: 5 18; -fx-font-weight: bold;"
-                                      text="OFF" />
-                    </HBox>
-                </VBox>
-
-                <VBox spacing="10" style="-fx-padding: 10 0 0 0;">
-                    <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Safety" />
-                    <HBox alignment="CENTER_LEFT" spacing="16">
-                        <VBox>
-                            <Label style="-fx-font-size: 14px;" text="Safe Mode" />
-                            <Label fx:id="safeModeDesc"
-                                   style="-fx-text-fill: #27ae60; -fx-font-size: 12px;"
-                                   text="ON — Files moved to Trash (recoverable)" />
-                        </VBox>
-                        <HBox HBox.hgrow="ALWAYS"/>
-                        <ToggleButton fx:id="safeModeToggle"
-                                      style="-fx-background-radius: 20; -fx-padding: 5 18; -fx-font-weight: bold;"
-                                      text="ON" />
-                    </HBox>
-                </VBox>
-
-                <Label fx:id="statusLabel"
-                       style="-fx-font-size: 13px; -fx-text-fill: #27ae60; -fx-font-style: italic; -fx-padding: 10 0 0 0;"
-                       text="Settings auto-saved" />
             </VBox>
+
+            <!-- APPEARANCE SETTINGS -->
+            <VBox spacing="20" 
+                  style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                
+                <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" 
+                       text="🎨 Appearance" />
+                
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <VBox>
+                        <Label style="-fx-font-size: 14px;" text="Dark Mode" />
+                        <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"
+                               text="Switch between light and dark theme" />
+                    </VBox>
+                    <HBox HBox.hgrow="ALWAYS"/>
+                    <ToggleButton fx:id="darkThemeToggle"
+                                  style="-fx-background-radius: 20; -fx-padding: 5 18; -fx-font-weight: bold;"
+                                  text="OFF" />
+                </HBox>
+            </VBox>
+
+            <!-- SOUND SETTINGS (NEW) -->
+            <VBox spacing="20" 
+                  style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                
+                <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" 
+                       text="🔊 Sound Effects" />
+                
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <VBox>
+                        <Label style="-fx-font-size: 14px;" text="Enable Sound Effects" />
+                        <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"
+                               text="Play sounds for scans, deletions, and UI actions" />
+                    </VBox>
+                    <HBox HBox.hgrow="ALWAYS"/>
+                    <ToggleButton fx:id="soundToggle"
+                                  style="-fx-background-radius: 20; -fx-padding: 5 18; -fx-font-weight: bold;"
+                                  text="ON" />
+                </HBox>
+
+                <VBox spacing="8">
+                    <Label style="-fx-font-size: 14px;" text="Volume" />
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" text="🔉" />
+                        <Slider fx:id="volumeSlider" 
+                                min="0" max="100" value="50"
+                                prefWidth="200"
+                                showTickMarks="true" 
+                                showTickLabels="false" />
+                        <Label style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" text="🔊" />
+                    </HBox>
+                </VBox>
+            </VBox>
+
+            <!-- SAFETY SETTINGS -->
+            <VBox spacing="20" 
+                  style="-fx-background-color: white; -fx-padding: 30px; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                
+                <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" 
+                       text="🛡️ Safety" />
+                
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <VBox>
+                        <Label style="-fx-font-size: 14px;" text="Safe Mode" />
+                        <Label fx:id="safeModeDesc"
+                               style="-fx-text-fill: #27ae60; -fx-font-size: 12px;"
+                               text="ON — Files moved to Trash (recoverable)" />
+                    </VBox>
+                    <HBox HBox.hgrow="ALWAYS"/>
+                    <ToggleButton fx:id="safeModeToggle"
+                                  style="-fx-background-radius: 20; -fx-padding: 5 18; -fx-font-weight: bold;"
+                                  text="ON" />
+                </HBox>
+            </VBox>
+<Button onAction="#clearHashCache"
+        style="-fx-background-color: #ecf0f1; -fx-text-fill: #e67e22;
+               -fx-background-radius: 8; -fx-padding: 10 20; -fx-font-weight: bold;"
+        text="🗑 Clear Hash Cache" />
+            <Label fx:id="statusLabel"
+                   style="-fx-font-size: 13px; -fx-text-fill: #27ae60; -fx-font-style: italic; -fx-padding: 10 0 0 0;"
+                   text="Settings auto-saved ✓" />
         </VBox>
     </content>
 </ScrollPane>

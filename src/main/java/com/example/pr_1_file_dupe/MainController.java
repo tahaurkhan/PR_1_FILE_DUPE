@@ -34,8 +34,16 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        javafx.application.Platform.runLater(() ->
-                ThemeManager.apply(mainLayout.getScene()));
+        // Apply theme immediately when scene is available
+        if (mainLayout.getScene() != null) {
+            ThemeManager.apply(mainLayout.getScene());
+        } else {
+            mainLayout.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    ThemeManager.apply(newScene);
+                }
+            });
+        }
         showFiles(null);
     }
 

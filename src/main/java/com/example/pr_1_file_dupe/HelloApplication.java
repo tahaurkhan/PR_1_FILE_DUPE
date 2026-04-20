@@ -58,7 +58,7 @@ public class HelloApplication extends Application {
         root.getChildren().add(content);
 
         Scene splashScene = new Scene(root, 500, 300);
-
+        
         // Transparent stage for modern look
         Stage splashStage = new Stage(StageStyle.TRANSPARENT);
         splashScene.setFill(null);
@@ -101,7 +101,7 @@ public class HelloApplication extends Application {
                 );
 
                 Scene mainScene = new Scene(loader.load(), 920, 650);
-
+                ThemeManager.apply(mainScene);
                 primaryStage.setTitle("Duplicate File Detector");
                 primaryStage.setScene(mainScene);
                 primaryStage.show();

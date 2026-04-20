@@ -1,5 +1,5 @@
 /* ============================================================
-   MATERIAL DARK THEME
+   MATERIAL DARK THEME - FIXED VERSION
    ============================================================ */
 .root {
     /* The core color palette */
@@ -98,6 +98,154 @@
     -fx-background-radius: 8; 
 }
 
+/* Cards */
+.card {
+    -fx-background-color: -surface-card;
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 12, 0, 0, 4);
+    -fx-padding: 20;
+}
+
+.card-sm {
+    -fx-background-color: -surface-card;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 8, 0, 0, 3);
+    -fx-padding: 14;
+}
+
+.stat-card {
+    -fx-background-color: -surface-card;
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 4);
+    -fx-padding: 16 20;
+    -fx-alignment: CENTER;
+}
+
+/* Text Fields */
+.text-field, .text-area {
+    -fx-background-color: -surface-card;
+    -fx-border-color: #424242;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12;
+    -fx-text-fill: -on-surface;
+    -fx-prompt-text-fill: -on-muted;
+}
+
+.text-field:focused, .text-area:focused {
+    -fx-border-color: -primary;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 191, 165, 0.3), 6, 0, 0, 0);
+}
+
+/* ComboBox */
+.combo-box {
+    -fx-background-color: -surface-card;
+    -fx-border-color: #424242;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.combo-box:focused {
+    -fx-border-color: -primary;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: -on-surface;
+    -fx-background-color: transparent;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: -surface-card;
+    -fx-border-color: #424242;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 10, 0, 0, 4);
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: -primary-light;
+    -fx-text-fill: -primary;
+}
+
+/* CheckBox */
+.check-box {
+    -fx-text-fill: -on-surface;
+}
+
+.check-box .box {
+    -fx-background-color: -surface-card;
+    -fx-border-color: #616161;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -primary;
+    -fx-border-color: -primary;
+}
+
+/* Toggle Buttons */
+.toggle-filter {
+    -fx-background-color: -surface-card;
+    -fx-text-fill: -on-muted;
+    -fx-background-radius: 20;
+    -fx-border-color: #424242;
+}
+
+.toggle-filter:hover {
+    -fx-background-color: -primary-light;
+    -fx-text-fill: -primary;
+}
+
+.toggle-filter:selected {
+    -fx-background-color: -primary;
+    -fx-text-fill: #121212;
+    -fx-font-weight: bold;
+}
+
+/* Buttons */
+.button-primary {
+    -fx-background-color: -primary; 
+    -fx-text-fill: #121212;
+    -fx-font-weight: bold; 
+    -fx-background-radius: 8; 
+    -fx-padding: 10 24; 
+    -fx-cursor: hand;
+}
+.button-primary:hover { 
+    -fx-background-color: -primary-dark; 
+}
+
+.button-danger {
+    -fx-background-color: -danger;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+}
+
+.button-danger:hover {
+    -fx-background-color: #D04B5C;
+}
+
+.button-ghost {
+    -fx-background-color: -surface-card;
+    -fx-text-fill: -on-surface;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-border-color: #424242;
+}
+
+.button-ghost:hover {
+    -fx-background-color: #2A2A2A;
+}
+
+.button-info {
+    -fx-background-color: -info;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+}
+
+.button-info:hover {
+    -fx-background-color: #5AA3DB;
+}
+
 /* TreeTableView */
 .tree-table-view { 
     -fx-background-color: -surface-card; 
@@ -125,22 +273,100 @@
     -fx-background-color: -primary-light; 
 }
 .tree-table-row-cell:selected { 
-    -fx-background-color: #004D40; /* Darker Teal selection */
+    -fx-background-color: #004D40;
 }
 .tree-table-row-cell .tree-table-cell { 
     -fx-text-fill: -on-surface; 
     -fx-padding: 6 12; 
 }
 
-/* ScrollBar */
-.scroll-bar { -fx-background-color: transparent; -fx-pref-width: 8px; }
-.scroll-bar .thumb { -fx-background-color: #424242; -fx-background-radius: 4; }
-.scroll-bar .thumb:hover { -fx-background-color: #616161; }
-.scroll-bar .track { -fx-background-color: transparent; }
-
-/* Buttons */
-.button-primary {
-    -fx-background-color: -primary; -fx-text-fill: #121212;
-    -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 10 24; -fx-cursor: hand;
+/* Table View */
+.table-view {
+    -fx-background-color: -surface-card;
+    -fx-border-color: transparent;
 }
-.button-primary:hover { -fx-background-color: -primary-dark; }
+
+.table-view .column-header {
+    -fx-background-color: -surface-side;
+    -fx-border-color: transparent transparent #2A2A2A transparent;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: -on-muted;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: -surface-card;
+    -fx-border-color: transparent transparent #2A2A2A transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #222222;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: -primary-light;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #004D40;
+}
+
+.table-row-cell .table-cell {
+    -fx-text-fill: -on-surface;
+}
+
+/* ScrollBar */
+.scroll-bar { 
+    -fx-background-color: transparent; 
+    -fx-pref-width: 8px; 
+}
+.scroll-bar .thumb { 
+    -fx-background-color: #424242; 
+    -fx-background-radius: 4; 
+}
+.scroll-bar .thumb:hover { 
+    -fx-background-color: #616161; 
+}
+.scroll-bar .track { 
+    -fx-background-color: transparent; 
+}
+
+/* Progress Indicator */
+.progress-indicator {
+    -fx-progress-color: -primary;
+}
+
+/* Pie Chart */
+.chart {
+    -fx-background-color: transparent;
+}
+
+.chart-title {
+    -fx-text-fill: -on-surface;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+.chart-legend-item {
+    -fx-text-fill: -on-surface;
+}
+
+/* Separator */
+.separator .line {
+    -fx-border-color: #2A2A2A;
+}
+
+/* Tips Panel */
+.tip-panel {
+    -fx-background-color: #1B3A2F;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+}
+
+.tip-panel .label {
+    -fx-text-fill: #81C784;
+}
