@@ -11,7 +11,7 @@ import java.util.*;
  * Shows only parent folders, not individual child files
  * Optimized for program and folder-level duplicate detection
  */
-public class FolderDuplicateDetector {
+public class FolderDuplicateFinder {
 
     /**
      * Find duplicate folders (parent-level only)
