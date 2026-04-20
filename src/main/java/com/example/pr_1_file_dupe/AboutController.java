@@ -12,7 +12,7 @@ public class AboutController {
 
     // Developer 2 Social Media URLs (Replace with actual URLs)
     private static final String DEV2_LINKEDIN = "https://www.linkedin.com/in/praveen-gupta";
-    private static final String DEV2_GITHUB = "https://github.com/praveengupta";
+    private static final String DEV2_GITHUB = "https://github.com/guptapraveen67984-dev";
     private static final String DEV2_TWITTER = "https://twitter.com/praveengupta";
 
     // ═══════════════════════════════════════════════

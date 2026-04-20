@@ -1,4 +1,4 @@
-package com.example.pr_1_file_dupe.utils;
+package com.example.pr_1_file_dupe;
 
 import java.io.File;
 import java.nio.file.Files;

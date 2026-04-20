@@ -154,7 +154,6 @@ public class MainController {
             }
         } catch (IOException ex) { showError("Error loading About screen."); }
     }
-
     @FXML
     public void menuReportBug() {
         // 🔥 FIXED: Check OS to prevent GTK error trap crash on Linux

@@ -1,4 +1,4 @@
-package com.example.pr_1_file_dupe.utils;
+package com.example.pr_1_file_dupe;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
