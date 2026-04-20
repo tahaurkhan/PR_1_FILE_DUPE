@@ -140,6 +140,26 @@ public class SettingsController {
             }
         });
     }
+    
+    @FXML
+    public void clearHashCache() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Clear Hash Cache");
+        confirm.setHeaderText("Clear cached file hashes?");
+        confirm.setContentText(
+            "This will force a full rehash on the next scan.\n" +
+            "Only do this if you suspect cache corruption."
+        );
+        
+        if (confirm.showAndWait().orElse(javafx.scene.control.ButtonType.CANCEL)
+            == javafx.scene.control.ButtonType.OK) {
+            
+            new HashDatabase().clearCache();
+            
+            statusLabel.setText("✅ Hash cache cleared");
+            statusLabel.setStyle("-fx-text-fill: #e67e22;");
+        }
+    }
 
     // ════════════════════════════════════════════════
     // UI UPDATE METHODS

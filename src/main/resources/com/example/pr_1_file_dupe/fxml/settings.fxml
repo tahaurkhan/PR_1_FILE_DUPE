@@ -138,7 +138,10 @@
                                   text="ON" />
                 </HBox>
             </VBox>
-
+<Button onAction="#clearHashCache"
+        style="-fx-background-color: #ecf0f1; -fx-text-fill: #e67e22;
+               -fx-background-radius: 8; -fx-padding: 10 20; -fx-font-weight: bold;"
+        text="🗑 Clear Hash Cache" />
             <Label fx:id="statusLabel"
                    style="-fx-font-size: 13px; -fx-text-fill: #27ae60; -fx-font-style: italic; -fx-padding: 10 0 0 0;"
                    text="Settings auto-saved ✓" />

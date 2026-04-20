@@ -13,7 +13,7 @@ public class DataStore {
     private static final String CONFIG_FILE = "stats.properties";
     private Properties props = new Properties();
 
-    public dataStore() {
+    public DataStore() {
         load();
     }
 
