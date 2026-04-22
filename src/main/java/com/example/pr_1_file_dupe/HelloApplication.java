@@ -25,41 +25,54 @@ public class HelloApplication extends Application {
         // 🎬 SPLASH UI
         // =========================
         StackPane root = new StackPane();
-        root.setStyle("-fx-background-color: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);");
+        root.setStyle("-fx-background-color: linear-gradient(to bottom, #a1c4fd, #c2e9fb);");
 
         VBox content = new VBox(10);
         content.setStyle("-fx-alignment: center;");
 
-        // 🔥 ADD APP LOGO
+        // =========================
+        // 🔥 LOAD HIGH-QUALITY LOGO (PNG ONLY)
+        // =========================
+        Image logoImage = null;
+
         try {
-            URL logoUrl = getClass().getResource("/com/example/pr_1_file_dupe/images/logo.png");
+            URL logoUrl = getClass().getResource("/com/example/pr_1_file_dupe/img/logo.png");
+
             if (logoUrl != null) {
-                Image logoImage = new Image(logoUrl.toExternalForm());
+                logoImage = new Image(logoUrl.toExternalForm());
+
                 ImageView logoView = new ImageView(logoImage);
-                logoView.setFitWidth(100); // Size of logo
+                logoView.setFitWidth(120);
                 logoView.setPreserveRatio(true);
+
+                // Smooth rendering
+                logoView.setSmooth(true);
+                logoView.setCache(true);
+
                 content.getChildren().add(logoView);
-                
-                // Add logo to the main app window taskbar
-                primaryStage.getIcons().add(logoImage);
+            } else {
+                System.out.println("Logo not found!");
             }
+
         } catch (Exception e) {
-            System.out.println("No logo.png found in images folder.");
+            e.printStackTrace();
         }
 
+        // =========================
+        // 🏷 TEXT
+        // =========================
         Label title = new Label("Duplicate File Detector");
-        title.setStyle("-fx-text-fill: white; -fx-font-size: 28px; -fx-font-weight: bold;");
+        title.setStyle("-fx-text-fill: #3f5145; -fx-font-size: 28px; -fx-font-weight: bold;");
 
         Label subtitle = new Label("Smart File Cleaner");
-        subtitle.setStyle("-fx-text-fill: #cccccc; -fx-font-size: 14px;");
+        subtitle.setStyle("-fx-text-fill: #594545; -fx-font-size: 14px;");
 
         content.getChildren().addAll(title, subtitle);
-
         root.getChildren().add(content);
 
         Scene splashScene = new Scene(root, 500, 300);
-        
-        // Transparent stage for modern look
+
+        // Transparent splash
         Stage splashStage = new Stage(StageStyle.TRANSPARENT);
         splashScene.setFill(null);
         splashStage.setScene(splashScene);
@@ -68,7 +81,6 @@ public class HelloApplication extends Application {
         // =========================
         // 🎥 ANIMATIONS
         // =========================
-
         FadeTransition fade = new FadeTransition(Duration.seconds(1.5), content);
         fade.setFromValue(0);
         fade.setToValue(1);
@@ -93,6 +105,8 @@ public class HelloApplication extends Application {
         // =========================
         // ⏳ LOAD MAIN APP
         // =========================
+        Image finalLogoImage = logoImage; // keep reference
+
         PauseTransition delay = new PauseTransition(Duration.seconds(2.5));
         delay.setOnFinished(e -> {
             try {
@@ -101,8 +115,17 @@ public class HelloApplication extends Application {
                 );
 
                 Scene mainScene = new Scene(loader.load(), 920, 650);
+
+                // Apply theme
                 ThemeManager.apply(mainScene);
+
+                // Set title
                 primaryStage.setTitle("Duplicate File Detector");
+// ✅ SET APP ICON (TASKBAR + WINDOW)
+                if (finalLogoImage != null) {
+                    primaryStage.getIcons().add(finalLogoImage);
+                }
+
                 primaryStage.setScene(mainScene);
                 primaryStage.show();
 

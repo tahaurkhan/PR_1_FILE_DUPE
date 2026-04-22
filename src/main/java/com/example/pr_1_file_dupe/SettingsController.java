@@ -1,28 +1,25 @@
 package com.example.pr_1_file_dupe;
 
-import com.example.pr_1_file_dupe.utils.SoundManager;
+import com.example.pr_1_file_dupe.utils.SoundManager;  // ✅ CORRECT IMPORT
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 
 /**
- *  Settings Controller
- * Adds controls for:
- * - System file filtering
- * - Sound effects toggle
- * - Volume control
+ * Settings Controller - FIXED VERSION
+ * Properly imports SoundManager from utils package
  */
 public class SettingsController {
 
     @FXML private ComboBox<String> algoDropdown;
     @FXML private CheckBox skipHiddenCheckbox;
-    @FXML private CheckBox skipSystemFilesCheckbox; // NEW
+    @FXML private CheckBox skipSystemFilesCheckbox;
     @FXML private TextField minSizeInput;
     @FXML private Label statusLabel;
     @FXML private ToggleButton darkThemeToggle;
     @FXML private ToggleButton safeModeToggle;
-    @FXML private ToggleButton soundToggle; // NEW
-    @FXML private Slider volumeSlider; // NEW
+    @FXML private ToggleButton soundToggle;
+    @FXML private Slider volumeSlider;
     @FXML private Label safeModeDesc;
 
     private DataStore store;
@@ -31,12 +28,10 @@ public class SettingsController {
     public void initialize() {
         store = new DataStore();
 
-        // ═══════════════════════════════════════════════
-        // LOAD SAVED SETTINGS
-        // ═══════════════════════════════════════════════
+        // Load saved settings
         algoDropdown.setValue(store.getHashAlgorithm());
         skipHiddenCheckbox.setSelected(store.isSkipHidden());
-        skipSystemFilesCheckbox.setSelected(store.isSkipSystemFiles()); // NEW
+        skipSystemFilesCheckbox.setSelected(store.isSkipSystemFiles());
         minSizeInput.setText(String.valueOf(store.getMinFileSizeKB()));
 
         boolean dark = store.isDarkTheme();
@@ -47,7 +42,7 @@ public class SettingsController {
         safeModeToggle.setSelected(safe);
         updateSafeModeUI(safe);
 
-        // NEW: Sound settings
+        // Sound settings
         boolean soundEnabled = store.isSoundEnabled();
         soundToggle.setSelected(soundEnabled);
         updateSoundButtonUI(soundEnabled);
@@ -58,11 +53,7 @@ public class SettingsController {
             SoundManager.setVolume(store.getSoundVolume());
         }
 
-        // ═══════════════════════════════════════════════
-        // AUTO APPLY SETTINGS
-        // ═══════════════════════════════════════════════
-
-        // 🌙 DARK MODE
+        // Auto-apply listeners
         darkThemeToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
             store.setDarkTheme(newVal);
             updateDarkButtonUI(newVal);
@@ -71,32 +62,24 @@ public class SettingsController {
             SoundManager.play(SoundManager.Sound.BUTTON_CLICK);
         });
 
-        // 🔒 SAFE MODE
         safeModeToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
             store.setSafeMode(newVal);
             updateSafeModeUI(newVal);
-
-            if (!newVal) {
-                showWarning();
-            }
-
+            if (!newVal) showWarning();
             statusLabel.setText(newVal ? "Safe mode ON" : "⚠ Safe mode OFF");
             SoundManager.play(SoundManager.Sound.BUTTON_CLICK);
         });
 
-        // 🔊 SOUND TOGGLE (NEW)
         soundToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
             store.setSoundEnabled(newVal);
             SoundManager.setSoundEnabled(newVal);
             updateSoundButtonUI(newVal);
             statusLabel.setText(newVal ? "Sound effects enabled" : "Sound effects disabled");
-            
             if (newVal) {
                 SoundManager.play(SoundManager.Sound.SUCCESS);
             }
         });
 
-        // 🔊 VOLUME SLIDER (NEW)
         if (volumeSlider != null) {
             volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
                 double volume = newVal.doubleValue() / 100.0;
@@ -106,7 +89,6 @@ public class SettingsController {
             });
         }
 
-        // ⚙️ ALGORITHM
         algoDropdown.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 store.setHashAlgorithm(newVal);
@@ -115,21 +97,18 @@ public class SettingsController {
             }
         });
 
-        // 📁 SKIP HIDDEN
         skipHiddenCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
             store.setSkipHidden(newVal);
             statusLabel.setText(newVal ? "Skipping hidden files" : "Including hidden files");
             SoundManager.play(SoundManager.Sound.BUTTON_CLICK);
         });
 
-        // 🛡️ SKIP SYSTEM FILES (NEW)
         skipSystemFilesCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
             store.setSkipSystemFiles(newVal);
             statusLabel.setText(newVal ? "System protection enabled" : "System protection disabled");
             SoundManager.play(SoundManager.Sound.BUTTON_CLICK);
         });
 
-        // 📏 MIN SIZE
         minSizeInput.textProperty().addListener((obs, oldVal, newVal) -> {
             try {
                 long value = Long.parseLong(newVal);
@@ -161,10 +140,6 @@ public class SettingsController {
         }
     }
 
-    // ════════════════════════════════════════════════
-    // UI UPDATE METHODS
-    // ════════════════════════════════════════════════
-    
     private void updateDarkButtonUI(boolean dark) {
         darkThemeToggle.setText(dark ? "ON" : "OFF");
         darkThemeToggle.setStyle(dark
@@ -176,11 +151,9 @@ public class SettingsController {
         Scene scene = darkThemeToggle.getScene();
         if (scene != null) {
             scene.getStylesheets().clear();
-
             String css = dark 
                 ? "/com/example/pr_1_file_dupe/CSS/dark-theme.css" 
                 : "/com/example/pr_1_file_dupe/CSS/application.css";
-            
             String cssPath = getClass().getResource(css).toExternalForm();
             scene.getStylesheets().add(cssPath);
         }

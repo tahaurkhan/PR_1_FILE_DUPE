@@ -14,8 +14,7 @@ module com.example.pr_1_file_dupe {
     opens com.example.pr_1_file_dupe.service to javafx.fxml;
     exports com.example.pr_1_file_dupe.service;
 
-    // CLI package
-    exports com.example.pr_1_file_dupe.service.CLI;
+
     
     // 🔥 ADD THIS: Utils package for SoundManager
     opens com.example.pr_1_file_dupe.utils to javafx.fxml;

@@ -25,7 +25,6 @@
             <artifactId>javafx-fxml</artifactId>
             <version>21.0.6</version>
         </dependency>
-        <!-- 🔥 ADD THIS: JavaFX Media for sound effects -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-media</artifactId>
@@ -82,6 +81,18 @@
                     <target>25</target>
                 </configuration>
             </plugin>
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-jar-plugin</artifactId>
+    <version>3.2.2</version>
+    <configuration>
+        <archive>
+            <manifest>
+                <mainClass>com.example.pr_1_file_dupe.HelloApplication</mainClass>
+            </manifest>
+        </archive>
+    </configuration>
+</plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -90,7 +101,7 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.pr_1_file_dupe/com.example.pr_1_file_dupe.HelloApplication</mainClass>
+                            <mainClass>com.example.pr_1_file_dupe.HelloApplication</mainClass>
                             <launcher>DuplicateFinder</launcher>
                             <jlinkZipName>app</jlinkZipName>
                             <jlinkImageName>app</jlinkImageName>
