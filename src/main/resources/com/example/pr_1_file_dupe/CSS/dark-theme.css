@@ -23,7 +23,49 @@
     -fx-font-family: "Segoe UI", "Ubuntu", "Helvetica Neue", sans-serif;
     -fx-font-size: 14px;
 }
+/* IMPROVED DARK THEME */
+.root {
+    -primary:        #00a8a8; /* Brighter teal for contrast */
+    -primary-light:  #1a3d3d;
+    -surface:        #121212; /* Deep black/grey background */
+    -surface-card:   #1e1e1e; /* Slightly lighter for cards */
+    -surface-side:   #181818; 
+    -on-surface:     #e0e0e0; /* Off-white text for less eye strain */
+    -on-muted:       #a0a0a0;
+    
+    -fx-background-color: -surface;
+}
 
+/* Fix Labels */
+.label {
+    -fx-text-fill: -on-surface;
+}
+
+/* Fix Table View for Dark Mode */
+.tree-table-view, .table-view {
+    -fx-background-color: -surface;
+    -fx-border-color: #333333;
+}
+
+.tree-table-row-cell, .table-row-cell {
+    -fx-background-color: -surface-card;
+    -fx-text-fill: -on-surface;
+}
+
+.tree-table-row-cell:odd, .table-row-cell:odd {
+    -fx-background-color: #252525;
+}
+
+.tree-table-row-cell:hover, .table-row-cell:hover {
+    -fx-background-color: -primary-light;
+}
+
+/* Fix Text Fields */
+.text-field {
+    -fx-background-color: #2c2c2c;
+    -fx-text-fill: white;
+    -fx-border-color: #444444;
+}
 /* Global Text */
 .label { -fx-text-fill: -on-surface; }
 .text-muted { -fx-text-fill: -on-muted; -fx-font-size: 12px; }

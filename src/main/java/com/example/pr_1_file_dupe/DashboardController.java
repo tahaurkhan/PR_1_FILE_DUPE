@@ -103,6 +103,9 @@ public class DashboardController {
         scanButton.setDisable(true);
         System.out.println("🔍 Initializing scanner for: " + targetFolder);
 
+        //    add sound program
+        
+        com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.SCAN_START);
         Task<Map<String, List<FileData>>> scanTask = new Task<>() {
             @Override
             protected Map<String, List<FileData>> call() throws Exception {
@@ -175,7 +178,7 @@ public class DashboardController {
                 alert.setTitle("System Scan Complete");
                 alert.setHeaderText("✅ Full system scan complete!");
                 alert.setContentText(
-                    "Found " + duplicates.size() + " duplicate groups\n" +
+                    "Foun     d " + duplicates.size() + " duplicate groups\n" +
                     "Total files: " + totalFiles + "\n\n" +
                     "💡 Next scan will be MUCH faster!"
                 );
@@ -199,36 +202,35 @@ public class DashboardController {
         Map<String, List<FileData>> duplicates = scanTask.getValue();
         lastScanResults = duplicates;
 
-        int totalFiles = duplicates.values().stream()
-                .mapToInt(List::size).sum();
+        // Update session stats
+        int totalFiles = duplicates.values().stream().mapToInt(List::size).sum();
         new DataStore().updateStats(0, duplicates.size(), totalFiles);
 
         initialize();
-
         loadingBox.setVisible(false);
         scanButton.setDisable(false);
 
+        // Play completion sound
+        com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.SCAN_COMPLETE);
+
+        // 🔥 AUTOMATIC SWITCH: Access the MainController and trigger the Duplicates button
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(
-                    "/com/example/pr_1_file_dupe/fxml/dupelicate.fxml"));
-            Parent duplicatesScreen = loader.load();
-
-            BorderPane mainLayout = (BorderPane) pathInputField.getScene().getRoot();
-            mainLayout.setCenter(duplicatesScreen);
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Scan Complete");
-            alert.setHeaderText(null);
-            alert.setContentText("Found " + duplicates.size() + 
-                " duplicate groups with " + totalFiles + " total files.");
-            alert.showAndWait();
-
+            // Find the root BorderPane
+            javafx.scene.layout.BorderPane root = (javafx.scene.layout.BorderPane) pathInputField.getScene().getRoot();
+            
+            // Find the btnDuplicates from the sidebar
+            // This assumes btnDuplicates is defined in your main.fxml
+            javafx.scene.control.Button btnDup = (javafx.scene.control.Button) root.lookup("#btnDuplicates");
+            
+            if (btnDup != null) {
+                // Programmatically click the button to trigger logic in MainController
+                btnDup.fire();
+            }
         } catch (Exception ex) {
-            ex.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, 
-                "Could not load duplicates view: " + ex.getMessage()).showAndWait();
+            System.out.println("Auto-switch failed, but scan data is saved.");
         }
-    }
+    }   
+    
 
     private void handleScanFailure(Task<Map<String, List<FileData>>> scanTask) {
         loadingBox.setVisible(false);

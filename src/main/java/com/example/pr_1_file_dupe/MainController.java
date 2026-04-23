@@ -34,19 +34,20 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        // Apply theme immediately when scene is available
+        // 🔥 FIX: Load saved sound preferences when the app starts!
+        DataStore store = new DataStore();
+        com.example.pr_1_file_dupe.utils.SoundManager.setSoundEnabled(store.isSoundEnabled());
+        com.example.pr_1_file_dupe.utils.SoundManager.setVolume(store.getSoundVolume());
+
         if (mainLayout.getScene() != null) {
             ThemeManager.apply(mainLayout.getScene());
         } else {
             mainLayout.sceneProperty().addListener((obs, oldScene, newScene) -> {
-                if (newScene != null) {
-                    ThemeManager.apply(newScene);
-                }
+                if (newScene != null) ThemeManager.apply(newScene);
             });
         }
         showFiles(null);
     }
-
     @FXML public void showFiles(ActionEvent e) {
         setActive(btnFiles);
         loadScreen("/com/example/pr_1_file_dupe/fxml/dashboard.fxml");
@@ -60,20 +61,28 @@ public class MainController {
         catch (Exception ex) { ex.printStackTrace(); showError("Error loading Duplicates: " + ex.getMessage()); }
     }
 
-    @FXML public void showCategories(ActionEvent e) {
-        setActive(btnCategories);
+    @FXML 
+    public void showCategories(ActionEvent e) {
+        // 1. Validation FIRST: Don't do any work if there is no data
         if (DashboardController.lastScanResults == null || DashboardController.lastScanResults.isEmpty()) {
             showError("Please run a scan from the Dashboard first.");
-            return;
+            return; 
         }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/categories.fxml"));
-            Parent screen = loader.load();
-            ((CategoriesController) loader.getController()).generateChart(DashboardController.lastScanResults);
-            mainLayout.setCenter(screen);
-        } catch (Exception ex) { showError("Error loading Categories: " + ex.getMessage()); }
-    }
 
+        
+        setActive(btnCategories);
+
+        try {
+            loadScreen("/com/example/pr_1_file_dupe/fxml/categories.fxml");
+           
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/categories.fxml")); 
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showError("Could not load the Categories screen.");
+        }
+    }
+    
+    
     @FXML public void showRecovery(ActionEvent e) {
         setActive(btnRecovery);
         loadScreen("/com/example/pr_1_file_dupe/fxml/recovery.fxml");
@@ -189,6 +198,8 @@ public class MainController {
     }
 
     private void loadScreen(String fxmlPath) {
+    	com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.NAVIGATION);
+        
         try { mainLayout.setCenter(new FXMLLoader(getClass().getResource(fxmlPath)).load()); } 
         catch (IOException e) { showError("Error loading screen: " + fxmlPath); }
     }

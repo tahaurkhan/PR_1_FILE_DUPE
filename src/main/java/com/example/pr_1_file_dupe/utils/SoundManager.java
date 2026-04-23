@@ -15,7 +15,7 @@ public class SoundManager {
 
     public enum Sound {
         SCAN_START("scan_start.mp3"),
-        SCAN_COMPLETE("scan_complete.mp3"),
+        SCAN_COMPLETE("scan_compleate.mp3"),
         DELETE_FILE("delete.mp3"),
         BUTTON_CLICK("click.mp3"),
         ERROR("error.mp3"),
@@ -42,7 +42,7 @@ public class SoundManager {
 
         try {
             URL resource = SoundManager.class.getResource(
-                    "/com/example/pr_1_file_dupe/sounds/" + sound.getFilename()
+                    "/com/example/pr_1_file_dupe/sound/" + sound.getFilename()
             );
 
             if (resource == null) {

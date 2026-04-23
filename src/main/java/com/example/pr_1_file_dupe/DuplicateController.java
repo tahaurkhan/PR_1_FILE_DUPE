@@ -236,8 +236,10 @@ public class DuplicateController {
         root.getChildren().removeAll(emptyGroups);
 
         new DataStore().updateStats(totalSize, emptyGroups.size(), 0);
-        refreshSelectedCount();
-
+        refreshSelectedCount();		
+        	
+        com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.DELETE_FILE);
+        new Alert(Alert.AlertType.INFORMATION, "Moved " + deleted + " files...").showAndWait();
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Done");
         alert.setHeaderText(null);

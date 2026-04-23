@@ -155,7 +155,9 @@ public class SettingsController {
                 ? "/com/example/pr_1_file_dupe/CSS/dark-theme.css" 
                 : "/com/example/pr_1_file_dupe/CSS/application.css";
             String cssPath = getClass().getResource(css).toExternalForm();
+            
             scene.getStylesheets().add(cssPath);
+            ThemeManager.apply(scene);
         }
     }
 

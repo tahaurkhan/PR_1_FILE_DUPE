@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+# This workflow will build a Java project with Maven
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+>>>>>>> 2f89858 (maven update)
 name: Java CI with Maven
 
 on:
@@ -14,7 +20,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+<<<<<<< HEAD
     - name: Set up JDK 21
+=======
+    - name: Set up JDK 17
+>>>>>>> 2f89858 (maven update)
       uses: actions/setup-java@v4
       with:
         java-version: '21'
