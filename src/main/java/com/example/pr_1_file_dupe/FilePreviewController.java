@@ -53,13 +53,18 @@ public class FilePreviewController {
                 textPreview.setManaged(false);
                 
             } else if (isTextFile(extension)) {
-                // Show text preview
-                String content = Files.readString(file.toPath());
-                // Limit to first 5000 characters
-                if (content.length() > 5000) {
-                    content = content.substring(0, 5000) + "\n\n... (file truncated)";
+                
+                // 🔥 FIXED: Smart Size Limiting (2 MB max) instead of character truncation
+                long maxSizeBytes = 2 * 1024 * 1024; 
+                
+                if (file.length() > maxSizeBytes) {
+                    textPreview.setText("File is too large to preview safely (> 2MB).\n\nPlease close this window and use the gray '↗ Open' button to view it in your system's default editor.");
+                } else {
+                    // File is safe size, load the FULL document
+                    String content = Files.readString(file.toPath());
+                    textPreview.setText(content);
                 }
-                textPreview.setText(content);
+                
                 textPreview.setVisible(true);
                 textPreview.setManaged(true);
                 imagePreview.setVisible(false);

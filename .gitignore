@@ -37,3 +37,13 @@ build/
 
 ### Mac OS ###
 .DS_Storehash_cache.db
+
+# Ignore Database Cache
+hash_cache.db
+
+# Ignore generated CSV reports
+*.csv
+.~lock.*.csv#
+
+# Ignore compiled Maven output
+target/

@@ -117,7 +117,7 @@ public class HelloApplication extends Application {
                 Scene mainScene = new Scene(loader.load(), 920, 650);
 
                 // Apply theme
-                ThemeManager.apply(mainScene);
+//                ThemeManager.apply(mainScene);
 
                 // Set title
                 primaryStage.setTitle("Duplicate File Detector");

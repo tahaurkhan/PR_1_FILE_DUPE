@@ -7,7 +7,6 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.example.pr_1_file_dupe.DuplicatesController">
 
-    <!-- Header -->
     <VBox style="-fx-background-color: white; -fx-padding: 24 30 20 30;
                  -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 3);">
         <HBox alignment="CENTER_LEFT" spacing="20">
@@ -18,7 +17,6 @@
                        text="Review and clean up duplicate file groups from your last scan." />
             </VBox>
 
-            <!-- Summary chips -->
             <HBox spacing="12" alignment="CENTER_RIGHT">
                 <VBox alignment="CENTER"
                       style="-fx-background-color: #eaf4fb; -fx-background-radius: 10; -fx-padding: 10 18;">
@@ -41,7 +39,6 @@
             </HBox>
         </HBox>
 
-        <!-- Filter bar -->
         <HBox spacing="8" style="-fx-padding: 16 0 0 0;">
             <Label style="-fx-text-fill: #7f8c8d; -fx-font-size: 13px;
                           -fx-padding: 0 8 0 0;" text="Filter:" />
@@ -77,7 +74,6 @@
         </HBox>
     </VBox>
 
-    <!-- No data warning -->
     <VBox fx:id="noDataPane" alignment="CENTER" spacing="12"
           style="-fx-padding: 60;" visible="false" managed="false">
         <Label style="-fx-font-size: 40px;" text="🔍" />
@@ -87,19 +83,18 @@
                text="Go to the Dashboard and run a scan first." />
     </VBox>
 
-    <!-- Tree Table -->
     <TreeTableView fx:id="duplicatesTable" VBox.vgrow="ALWAYS"
                    style="-fx-border-color: transparent;" editable="true">
         <columns>
             <TreeTableColumn fx:id="selectCol"  prefWidth="60"  text="✓" />
-            <TreeTableColumn fx:id="nameCol"    prefWidth="300" text="File Name / Group" />
+            <TreeTableColumn fx:id="nameCol"    prefWidth="250" text="File Name / Group" />
+            <TreeTableColumn fx:id="actionCol"  prefWidth="80"  text="Action" />
             <TreeTableColumn fx:id="typeCol"    prefWidth="90"  text="Type" />
             <TreeTableColumn fx:id="sizeCol"    prefWidth="110" text="Size" />
-            <TreeTableColumn fx:id="pathCol"    prefWidth="380" text="Path" />
+            <TreeTableColumn fx:id="pathCol"    prefWidth="350" text="Path" />
         </columns>
     </TreeTableView>
 
-    <!-- Bottom action bar -->
     <HBox alignment="CENTER_LEFT" spacing="12"
           style="-fx-background-color: white; -fx-padding: 14 24;
                  -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 8, 0, -3, 0);">
@@ -115,6 +110,9 @@
                 style="-fx-background-color: #ecf0f1; -fx-text-fill: #2c3e50;
                        -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16;"
                 text="Auto-Select Dupes" />
+        <Button onAction="#exportToCSV" 
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 8 16;" 
+                text="📊 Export CSV" />
 
         <HBox HBox.hgrow="ALWAYS" />
 

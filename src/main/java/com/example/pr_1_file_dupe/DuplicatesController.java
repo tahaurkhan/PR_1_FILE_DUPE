@@ -1,11 +1,18 @@
 package com.example.pr_1_file_dupe;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -18,6 +25,7 @@ public class DuplicatesController {
     @FXML private TreeTableColumn<FileData, String>  typeCol;
     @FXML private TreeTableColumn<FileData, Long>    sizeCol;
     @FXML private TreeTableColumn<FileData, String>  pathCol;
+    @FXML private TreeTableColumn<FileData, Void>    actionCol;
 
     @FXML private Label  totalGroupsLabel;
     @FXML private Label  wastedSpaceLabel;
@@ -47,7 +55,7 @@ public class DuplicatesController {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
         fileChooser.setInitialFileName("Duplicate_Scan_Report_" + timestamp + ".csv");
         fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("CSV Files (*.csv)", "*.csv"));
-        java.io.File file = fileChooser.showSaveDialog(duplicatesTable.getScene().getWindow());
+        File file = fileChooser.showSaveDialog(duplicatesTable.getScene().getWindow());
 
         if (file != null) {
             try (java.io.PrintWriter writer = new java.io.PrintWriter(file)) {
@@ -68,7 +76,7 @@ public class DuplicatesController {
 
     @FXML
     public void initialize() {
-        // Bind the Checkbox to the TreeItem property correctly
+        // 1. Setup Columns
         selectCol.setCellValueFactory(cellData -> {
             TreeItem<FileData> item = cellData.getValue();
             if (item instanceof CheckBoxTreeItem) {
@@ -78,10 +86,10 @@ public class DuplicatesController {
         });
         selectCol.setCellFactory(CheckBoxTreeTableCell.forTreeTableColumn(selectCol));
 
-        nameCol.setCellValueFactory(new javafx.scene.control.cell.TreeItemPropertyValueFactory<>("name"));
-        typeCol.setCellValueFactory(new javafx.scene.control.cell.TreeItemPropertyValueFactory<>("type"));
+        nameCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
+        typeCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("type"));
 
-        sizeCol.setCellValueFactory(new javafx.scene.control.cell.TreeItemPropertyValueFactory<>("size"));
+        sizeCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("size"));
         sizeCol.setCellFactory(col -> new TreeTableCell<>() {
             @Override
             protected void updateItem(Long item, boolean empty) {
@@ -90,7 +98,7 @@ public class DuplicatesController {
             }
         });
 
-        pathCol.setCellValueFactory(new javafx.scene.control.cell.TreeItemPropertyValueFactory<>("path"));
+        pathCol.setCellValueFactory(new TreeItemPropertyValueFactory<>("path"));
         pathCol.setCellFactory(col -> new TreeTableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -103,8 +111,45 @@ public class DuplicatesController {
             }
         });
 
-        sortDropdown.setValue("Largest First");
+        // 2. Setup Smart Dual-Action Column
+        actionCol.setCellFactory(param -> new TreeTableCell<>() {
+            private final Button actionBtn = new Button();
 
+            {
+                actionBtn.setCursor(javafx.scene.Cursor.HAND);
+                actionBtn.setOnAction(event -> {
+                    FileData data = getTreeTableRow().getItem();
+                    if (data != null && !"Group".equals(data.getType())) {
+                        if (isPreviewable(data.getName())) {
+                            openFilePreview(data);
+                        } else {
+                            openWithOS(data.getPath());
+                        }
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                FileData rowData = getTreeTableRow() != null ? getTreeTableRow().getItem() : null;
+                
+                if (empty || rowData == null || "Group".equals(rowData.getType())) {
+                    setGraphic(null);
+                } else if (isPreviewable(rowData.getName())) {
+                    actionBtn.setText("👁 View");
+                    actionBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-size: 11px; -fx-font-weight: bold;");
+                    setGraphic(actionBtn);
+                } else {
+                    actionBtn.setText("↗ Open");
+                    actionBtn.setStyle("-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-size: 11px; -fx-font-weight: bold;");
+                    setGraphic(actionBtn);
+                }
+            }
+        });
+
+        // 3. Setup Filters and Sorting
+        sortDropdown.setValue("Largest First");
         ToggleGroup filterGroup = new ToggleGroup();
         filterAll.setToggleGroup(filterGroup);
         filterImages.setToggleGroup(filterGroup);
@@ -117,6 +162,7 @@ public class DuplicatesController {
             if (newVal == null) oldVal.setSelected(true);
         });
 
+        // 4. Load Data
         if (DashboardController.lastScanResults != null && !DashboardController.lastScanResults.isEmpty()) {
             masterData = DashboardController.lastScanResults;
             buildTable(masterData);
@@ -125,6 +171,58 @@ public class DuplicatesController {
         }
     }
 
+    private boolean isPreviewable(String fileName) {
+        if (fileName == null || !fileName.contains(".")) return false;
+        String ext = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+        return ext.matches("jpg|jpeg|png|gif|bmp|webp|txt|java|xml|json|csv|log|md|properties");
+    }
+
+    private void openFilePreview(FileData data) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/file-preview.fxml"));
+            Parent root = loader.load();
+            
+            FilePreviewController controller = loader.getController();
+            controller.setFileData(data);
+
+            Stage stage = new Stage();
+            stage.setTitle("Preview: " + data.getName());
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+ // 🔥 FIXED: OS-Specific Opener
+    private void openWithOS(String filePath) {
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                new Alert(Alert.AlertType.ERROR, "File not found! It may have been moved or deleted.").showAndWait();
+                return;
+            }
+
+            String os = System.getProperty("os.name").toLowerCase();
+
+            // Native handling for Linux systems
+            if (os.contains("linux")) {
+                Runtime.getRuntime().exec(new String[]{"xdg-open", file.getAbsolutePath()});
+            } 
+            // Fallback for Windows and Mac
+            else if (java.awt.Desktop.isDesktopSupported()) {
+                java.awt.Desktop.getDesktop().open(file);
+            } else {
+                new Alert(Alert.AlertType.WARNING, "Cannot open file. Desktop API not supported on this OS.").showAndWait();
+            }
+            
+        } catch (Exception e) {
+            System.out.println("Error opening file externally: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
     private void buildTable(Map<String, List<FileData>> data) {
         showNoData(data == null || data.isEmpty());
         if (data == null || data.isEmpty()) return;
@@ -154,15 +252,12 @@ public class DuplicatesController {
 
             CheckBoxTreeItem<FileData> groupNode = new CheckBoxTreeItem<>(header);
             groupNode.setExpanded(true);
-            groupNode.setIndependent(false); // 🔥 THIS ENABLES PARENT-CHILD CASCADE SELECTION
+            groupNode.setIndependent(false);
 
             for (FileData f : files) {
                 CheckBoxTreeItem<FileData> childNode = new CheckBoxTreeItem<>(f);
                 childNode.setSelected(!f.getPath().equals(newest.getPath()));
-                
-                // Update selection count in real-time
                 childNode.selectedProperty().addListener((obs, oldVal, newVal) -> refreshSelectedCount());
-                
                 groupNode.getChildren().add(childNode);
             }
 
@@ -256,6 +351,8 @@ public class DuplicatesController {
         List<TreeItem<FileData>> emptyGroups = new ArrayList<>();
         int  deleted   = 0;
         long totalSize = 0;
+        
+        boolean isSafeMode = new DataStore().isSafeMode();
 
         for (TreeItem<FileData> group : root.getChildren()) {
             for (TreeItem<FileData> node : group.getChildren()) {
@@ -267,7 +364,7 @@ public class DuplicatesController {
 
                     if (target.exists()) {
                         try {
-                            if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.MOVE_TO_TRASH)) {
+                            if (isSafeMode && java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.MOVE_TO_TRASH)) {
                                 success = java.awt.Desktop.getDesktop().moveToTrash(target);
                             } else {
                                 success = target.delete();
@@ -304,7 +401,7 @@ public class DuplicatesController {
 
         refreshSelectedCount();
 
-        new Alert(Alert.AlertType.INFORMATION, "Moved " + deleted + " files to Trash (" + formatSize(totalSize) + " reclaimed).").showAndWait();
+        new Alert(Alert.AlertType.INFORMATION, "Moved " + deleted + " files. (" + formatSize(totalSize) + " reclaimed).").showAndWait();
     }
 
     private void showNoData(boolean show) {

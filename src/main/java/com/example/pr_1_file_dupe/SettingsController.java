@@ -1,192 +1,128 @@
 package com.example.pr_1_file_dupe;
 
-import com.example.pr_1_file_dupe.utils.SoundManager;  // ✅ CORRECT IMPORT
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.util.Duration;
+import com.example.pr_1_file_dupe.HashDatabase;
 
-/**
- * Settings Controller - FIXED VERSION
- * Properly imports SoundManager from utils package
- */
 public class SettingsController {
 
     @FXML private ComboBox<String> algoDropdown;
-    @FXML private CheckBox skipHiddenCheckbox;
-    @FXML private CheckBox skipSystemFilesCheckbox;
-    @FXML private TextField minSizeInput;
-    @FXML private Label statusLabel;
-    @FXML private ToggleButton darkThemeToggle;
-    @FXML private ToggleButton safeModeToggle;
-    @FXML private ToggleButton soundToggle;
-    @FXML private Slider volumeSlider;
-    @FXML private Label safeModeDesc;
+    @FXML private CheckBox         skipHiddenCheckbox;
+    @FXML private CheckBox         skipSystemFilesCheckbox; 
+    @FXML private TextField        minSizeInput;
+    @FXML private Label            statusLabel;
+    @FXML private ToggleButton     safeModeToggle;
+    @FXML private Label            safeModeDesc;
+    @FXML private ToggleButton     soundToggle;
+    @FXML private Slider           volumeSlider;
 
     private DataStore store;
+    private PauseTransition saveIndicator; // Used to hide the "Saved ✓" text after a few seconds
 
     @FXML
     public void initialize() {
         store = new DataStore();
 
-        // Load saved settings
+        // Setup the fading "Saved" indicator timer
+        saveIndicator = new PauseTransition(Duration.seconds(2));
+        saveIndicator.setOnFinished(e -> statusLabel.setText(""));
+
+        // 1. LOAD INITIAL VALUES FROM DATASTORE
         algoDropdown.setValue(store.getHashAlgorithm());
         skipHiddenCheckbox.setSelected(store.isSkipHidden());
-        skipSystemFilesCheckbox.setSelected(store.isSkipSystemFiles());
         minSizeInput.setText(String.valueOf(store.getMinFileSizeKB()));
+        
+        // Load Sound
+        soundToggle.setSelected(store.isSoundEnabled());
+        soundToggle.setText(store.isSoundEnabled() ? "ON" : "OFF");
+        volumeSlider.setValue(store.getSoundVolume());
 
-        boolean dark = store.isDarkTheme();
-        darkThemeToggle.setSelected(dark);
-        updateDarkButtonUI(dark);
+        // Load Safe Mode
+        boolean initialSafe = store.isSafeMode();
+        safeModeToggle.setSelected(initialSafe);
+        updateSafeModeUI(initialSafe);
 
-        boolean safe = store.isSafeMode();
-        safeModeToggle.setSelected(safe);
-        updateSafeModeUI(safe);
+        // ---------------------------------------------------------
+        // 2. ATTACH AUTO-SAVE LISTENERS
+        // ---------------------------------------------------------
 
-        // Sound settings
-        boolean soundEnabled = store.isSoundEnabled();
-        soundToggle.setSelected(soundEnabled);
-        updateSoundButtonUI(soundEnabled);
-        SoundManager.setSoundEnabled(soundEnabled);
+        algoDropdown.valueProperty().addListener((obs, oldVal, newVal) -> {
+            store.setHashAlgorithm(newVal);
+            showSaved();
+        });
 
-        if (volumeSlider != null) {
-            volumeSlider.setValue(store.getSoundVolume() * 100);
-            SoundManager.setVolume(store.getSoundVolume());
-        }
+        skipHiddenCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            store.setSkipHidden(newVal);
+            showSaved();
+        });
 
-        // Auto-apply listeners
-        darkThemeToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            store.setDarkTheme(newVal);
-            updateDarkButtonUI(newVal);
-            applyTheme(newVal);
-            statusLabel.setText(newVal ? "Dark mode enabled" : "Light mode enabled");
-            SoundManager.play(SoundManager.Sound.BUTTON_CLICK);
+        // Smart text listener: Forces numeric input only, saves instantly
+        minSizeInput.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal.matches("\\d*")) {
+                minSizeInput.setText(newVal.replaceAll("[^\\d]", ""));
+            } else if (!newVal.isEmpty()) {
+                try {
+                    store.setMinFileSizeKB(Long.parseLong(newVal));
+                    showSaved();
+                } catch (NumberFormatException ignored) {}
+            }
+        });
+
+        soundToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            store.setSoundEnabled(newVal);
+            soundToggle.setText(newVal ? "ON" : "OFF");
+            com.example.pr_1_file_dupe.utils.SoundManager.setSoundEnabled(newVal);
+            showSaved();
+        });
+
+        volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double vol = newVal.doubleValue();
+            store.setSoundVolume(vol);
+            com.example.pr_1_file_dupe.utils.SoundManager.setVolume(vol);
+            showSaved();
         });
 
         safeModeToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
             store.setSafeMode(newVal);
             updateSafeModeUI(newVal);
-            if (!newVal) showWarning();
-            statusLabel.setText(newVal ? "Safe mode ON" : "⚠ Safe mode OFF");
-            SoundManager.play(SoundManager.Sound.BUTTON_CLICK);
-        });
 
-        soundToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            store.setSoundEnabled(newVal);
-            SoundManager.setSoundEnabled(newVal);
-            updateSoundButtonUI(newVal);
-            statusLabel.setText(newVal ? "Sound effects enabled" : "Sound effects disabled");
-            if (newVal) {
-                SoundManager.play(SoundManager.Sound.SUCCESS);
+            if (!newVal) {
+                Alert warn = new Alert(Alert.AlertType.WARNING);
+                warn.setTitle("Safe Mode Disabled");
+                warn.setHeaderText("⚠ Permanent deletion enabled");
+                warn.setContentText("Safe mode is OFF.\nFiles will be PERMANENTLY deleted.\nAre you sure?");
+                warn.showAndWait();
             }
-        });
-
-        if (volumeSlider != null) {
-            volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-                double volume = newVal.doubleValue() / 100.0;
-                store.setSoundVolume(volume);
-                SoundManager.setVolume(volume);
-                statusLabel.setText("Volume: " + (int) newVal.doubleValue() + "%");
-            });
-        }
-
-        algoDropdown.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                store.setHashAlgorithm(newVal);
-                statusLabel.setText("Algorithm: " + newVal);
-                SoundManager.play(SoundManager.Sound.BUTTON_CLICK);
-            }
-        });
-
-        skipHiddenCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            store.setSkipHidden(newVal);
-            statusLabel.setText(newVal ? "Skipping hidden files" : "Including hidden files");
-            SoundManager.play(SoundManager.Sound.BUTTON_CLICK);
-        });
-
-        skipSystemFilesCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            store.setSkipSystemFiles(newVal);
-            statusLabel.setText(newVal ? "System protection enabled" : "System protection disabled");
-            SoundManager.play(SoundManager.Sound.BUTTON_CLICK);
-        });
-
-        minSizeInput.textProperty().addListener((obs, oldVal, newVal) -> {
-            try {
-                long value = Long.parseLong(newVal);
-                store.setMinFileSizeKB(value);
-                statusLabel.setText("Min size: " + value + " KB");
-            } catch (Exception e) {
-                // Invalid input, ignore
-            }
+            showSaved();
         });
     }
-    
-    @FXML
-    public void clearHashCache() {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Clear Hash Cache");
-        confirm.setHeaderText("Clear cached file hashes?");
-        confirm.setContentText(
-            "This will force a full rehash on the next scan.\n" +
-            "Only do this if you suspect cache corruption."
-        );
-        
-        if (confirm.showAndWait().orElse(javafx.scene.control.ButtonType.CANCEL)
-            == javafx.scene.control.ButtonType.OK) {
-            
-            new HashDatabase().clearCache();
-            
-            statusLabel.setText("✅ Hash cache cleared");
-            statusLabel.setStyle("-fx-text-fill: #e67e22;");
-        }
-    }
 
-    private void updateDarkButtonUI(boolean dark) {
-        darkThemeToggle.setText(dark ? "ON" : "OFF");
-        darkThemeToggle.setStyle(dark
-                ? "-fx-background-color: #006565; -fx-text-fill: white; -fx-background-radius: 20;"
-                : "-fx-background-color: #ecf0f1; -fx-text-fill: #2c3e50; -fx-background-radius: 20;");
-    }
-
-    private void applyTheme(boolean dark) {
-        Scene scene = darkThemeToggle.getScene();
-        if (scene != null) {
-            scene.getStylesheets().clear();
-            String css = dark 
-                ? "/com/example/pr_1_file_dupe/CSS/dark-theme.css" 
-                : "/com/example/pr_1_file_dupe/CSS/application.css";
-            String cssPath = getClass().getResource(css).toExternalForm();
-            
-            scene.getStylesheets().add(cssPath);
-            ThemeManager.apply(scene);
-        }
-    }
-
+    // Helper to update Safe Mode colors
     private void updateSafeModeUI(boolean safe) {
         safeModeToggle.setText(safe ? "ON" : "OFF");
         safeModeToggle.setStyle(safe
-                ? "-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 20;"
-                : "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 20;");
-
-        if (safeModeDesc != null) {
-            safeModeDesc.setText(safe
-                    ? "ON — Files moved to Trash (recoverable)"
-                    : "OFF — Permanent delete ⚠");
-        }
+                ? "-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 5 18; -fx-font-weight: bold;"
+                : "-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 5 18; -fx-font-weight: bold;"
+        );
+        safeModeDesc.setText(safe ? "ON — Files moved to Trash (recoverable)" : "OFF — Files permanently deleted ⚠");
+        safeModeDesc.setStyle(safe ? "-fx-text-fill: #27ae60; -fx-font-size: 12px;" : "-fx-text-fill: #e74c3c; -fx-font-size: 12px; -fx-font-weight: bold;");
     }
 
-    private void updateSoundButtonUI(boolean enabled) {
-        soundToggle.setText(enabled ? "ON" : "OFF");
-        soundToggle.setStyle(enabled
-                ? "-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 20;"
-                : "-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 20;");
+    // Displays the "Auto-saved" text and fades it out after 2 seconds
+    private void showSaved() {
+        statusLabel.setStyle("-fx-text-fill: #2ecc71; -fx-font-style: italic;");
+        statusLabel.setText("Settings auto-saved ✓");
+        saveIndicator.playFromStart(); // Reset timer
     }
 
-    private void showWarning() {
-        SoundManager.play(SoundManager.Sound.ERROR);
-        Alert warn = new Alert(Alert.AlertType.WARNING);
-        warn.setTitle("Warning");
-        warn.setHeaderText("Permanent Delete Enabled");
-        warn.setContentText("Files will be permanently deleted when you click delete. This cannot be undone.");
-        warn.showAndWait();
+    // Button to manually clear the database cache
+    @FXML
+    public void clearHashCache() {
+        new HashDatabase().clearDatabase();
+        statusLabel.setStyle("-fx-text-fill: #e67e22; -fx-font-weight: bold;");
+        statusLabel.setText("Database Cache Cleared!");
+        saveIndicator.playFromStart();
     }
 }

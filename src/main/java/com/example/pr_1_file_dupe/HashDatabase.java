@@ -1,12 +1,8 @@
 package com.example.pr_1_file_dupe;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Persistent hash cache to speed up repeat scans.
@@ -39,8 +35,7 @@ public class HashDatabase {
 
     // 🔹 Save cache to disk
     public void save() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(
-                new FileOutputStream(CACHE_FILE))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(CACHE_FILE))) {
             oos.writeObject(cache);
             System.out.println("✅ Hash cache saved: " + cache.size() + " entries");
         } catch (IOException e) {
@@ -57,8 +52,7 @@ public class HashDatabase {
             return;
         }
 
-        try (ObjectInputStream ois = new ObjectInputStream(
-                new FileInputStream(file))) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             cache = (Map<String, CachedHash>) ois.readObject();
             System.out.println("✅ Hash cache loaded: " + cache.size() + " entries");
         } catch (IOException | ClassNotFoundException e) {
@@ -67,14 +61,25 @@ public class HashDatabase {
         }
     }
 
-    // 🔹 Clear entire cache
-    public void clearCache() {
-        cache.clear();
+    // 🔥 FIXED: Static method that correctly deletes the Java Serialization file
+    public static void clearDatabase() {
         File cacheFile = new File(CACHE_FILE);
         if (cacheFile.exists()) {
-            cacheFile.delete();
+            if (cacheFile.delete()) {
+                System.out.println("✅ Database cache file deleted successfully.");
+            } else {
+                System.out.println("❌ Failed to delete cache file.");
+            }
+        } else {
+            System.out.println("✅ Cache file is already empty.");
         }
-        System.out.println("✅ Hash cache cleared");
+    }
+
+    // 🔹 Clear entire cache for the current instance
+    public void clearCache() {
+        cache.clear();
+        clearDatabase(); // Re-use our static method to delete the file
+        System.out.println("✅ In-memory hash cache cleared");
     }
 
     // 🔹 Remove stale entries (files that no longer exist)

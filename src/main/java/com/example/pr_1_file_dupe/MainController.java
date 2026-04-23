@@ -34,18 +34,23 @@ public class MainController {
 
     @FXML
     public void initialize() {
-        // 🔥 FIX: Load saved sound preferences when the app starts!
+        // Load saved sound preferences
         DataStore store = new DataStore();
         com.example.pr_1_file_dupe.utils.SoundManager.setSoundEnabled(store.isSoundEnabled());
         com.example.pr_1_file_dupe.utils.SoundManager.setVolume(store.getSoundVolume());
 
+        // 🔥 RESTORE LIGHT MODE UI: Load the base stylesheet without the ThemeManager
         if (mainLayout.getScene() != null) {
-            ThemeManager.apply(mainLayout.getScene());
+            mainLayout.getScene().getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/application.css").toExternalForm());
         } else {
             mainLayout.sceneProperty().addListener((obs, oldScene, newScene) -> {
-                if (newScene != null) ThemeManager.apply(newScene);
+                if (newScene != null) {
+                    newScene.getStylesheets().clear();
+                    newScene.getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/application.css").toExternalForm());
+                }
             });
         }
+
         showFiles(null);
     }
     @FXML public void showFiles(ActionEvent e) {
@@ -55,7 +60,7 @@ public class MainController {
 
     @FXML public void showDuplicates(ActionEvent e) {
         setActive(btnDuplicates);
-        java.net.URL url = getClass().getResource("/com/example/pr_1_file_dupe/fxml/dupelicate.fxml");
+        java.net.URL url = getClass().getResource("/com/example/pr_1_file_dupe/fxml/duplicate.fxml");
         if (url == null) { showError("dupelicate.fxml not found."); return; }
         try { mainLayout.setCenter(new FXMLLoader(url).load()); } 
         catch (Exception ex) { ex.printStackTrace(); showError("Error loading Duplicates: " + ex.getMessage()); }
