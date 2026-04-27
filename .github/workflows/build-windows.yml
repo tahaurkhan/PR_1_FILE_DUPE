@@ -13,30 +13,22 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Set up Java
+    # Java 21 is the current Long-Term Support (LTS) version and matches your pom.xml
+    - name: Set up Java 21
       uses: actions/setup-java@v4
       with:
-        java-version: '25' 
+        java-version: '21' 
         distribution: 'temurin'
         cache: maven
 
-    - name: Build with Maven
-      run: mvn clean package
+    # 🔥 THE MAGIC: This one line builds the Fat JAR and runs jpackage automatically 
+    # using the profile we configured in your pom.xml!
+    - name: Build EXE with Maven Profile
+      run: mvn clean package -P windows-installer
 
-    - name: Prepare Installer Files
-      shell: cmd
-      run: |
-        if not exist target\installer-input mkdir target\installer-input
-        copy target\*.jar target\installer-input\
-        mvn dependency:copy-dependencies -DoutputDirectory=target\installer-input
-
-    - name: Build EXE with jpackage
-      shell: cmd
-      run: |
-        jpackage --type exe --dest dist_output --name "SmartFileDuplicateDetector" --input target\installer-input --main-jar PR_1_FILE_DUPE-1.0-SNAPSHOT.jar --main-class com.example.pr_1_file_dupe.Launcher --icon src\main\resources\com\example\pr_1_file_dupe\img\logo.ico --win-shortcut --win-menu --win-dir-chooser
-
+    # Grabs the finished .exe file from the folder Maven created
     - name: Upload Finished EXE
       uses: actions/upload-artifact@v4
       with:
-        name: Windows-Installer
-        path: dist_output\*.exe
+        name: SmartFileDuplicateDetector-Installer
+        path: target/installer/*.exe
