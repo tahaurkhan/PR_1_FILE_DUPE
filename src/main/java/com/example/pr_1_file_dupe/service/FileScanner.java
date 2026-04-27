@@ -5,32 +5,40 @@ import com.example.pr_1_file_dupe.FileData;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class FileScanner {
 
     private int skippedCount = 0;
+    private int throttleCounter = 0; // Throttles UI updates to prevent freezing
 
     /**
      * 🔥 FULL SYSTEM SCAN - Scans all user-accessible drives
      */
-    public List<FileData> scanFullSystem() {
+    public List<FileData> scanFullSystem(Consumer<String> progressCallback) {
         List<FileData> allFiles = new ArrayList<>();
-        
         File[] roots = File.listRoots();
         
+        if (progressCallback != null) {
+            progressCallback.accept("0:::Detecting system drives...");
+        }
+
         System.out.println("🔍 Starting FULL SYSTEM SCAN...");
         System.out.println("📂 Detected " + roots.length + " drive(s)");
         
         for (File root : roots) {
+            // 🔥 LISTEN FOR CANCEL: Stop moving to the next drive if cancelled
+            if (Thread.currentThread().isInterrupted()) break;
+            
             System.out.println("Scanning: " + root.getAbsolutePath());
-            allFiles.addAll(scanDirectory(root.getAbsolutePath()));
+            allFiles.addAll(scanDirectory(root.getAbsolutePath(), progressCallback));
         }
         
         System.out.println("✅ System scan complete: " + allFiles.size() + " files found");
         return allFiles;
     }
 
-    public List<FileData> scanDirectory(String path) {
+    public List<FileData> scanDirectory(String path, Consumer<String> progressCallback) {
         List<FileData> fileList = new ArrayList<>();
         File root = new File(path);
 
@@ -45,7 +53,7 @@ public class FileScanner {
         long minSizeInBytes = store.getMinFileSizeKB() * 1024;
 
         // Start recursive scan
-        scanRecursive(root, fileList, skipHidden, minSizeInBytes);
+        scanRecursive(root, fileList, skipHidden, minSizeInBytes, progressCallback);
         
         System.out.println("--- SCAN SUMMARY ---");
         System.out.println("Files successfully read: " + fileList.size());
@@ -55,8 +63,11 @@ public class FileScanner {
     }
 
     private void scanRecursive(File folder, List<FileData> fileList, 
-                               boolean skipHidden, long minSizeInBytes) {
+                               boolean skipHidden, long minSizeInBytes, Consumer<String> progressCallback) {
         try {
+            // 🔥 LISTEN FOR CANCEL: Stop recursion immediately if the user clicked cancel
+            if (Thread.currentThread().isInterrupted()) return;
+
             // 🛡️ DEFENSE 1: Skip symbolic links
             if (java.nio.file.Files.isSymbolicLink(folder.toPath())) {
                 skippedCount++;
@@ -93,6 +104,9 @@ public class FileScanner {
             }
 
             for (File file : files) {
+                // 🔥 LISTEN FOR CANCEL: Stop checking files if cancelled
+                if (Thread.currentThread().isInterrupted()) return;
+
                 try {
                     // Skip hidden files if enabled
                     if (skipHidden && file.isHidden()) {
@@ -101,7 +115,7 @@ public class FileScanner {
                     }
 
                     if (file.isDirectory()) {
-                        scanRecursive(file, fileList, skipHidden, minSizeInBytes);
+                        scanRecursive(file, fileList, skipHidden, minSizeInBytes, progressCallback);
                     } else {
                         // 🛡️ DEFENSE 4: Skip locked/unreadable files
                         if (!file.canRead()) {
@@ -122,6 +136,12 @@ public class FileScanner {
                         String type = getFileExtension(name);
 
                         fileList.add(new FileData(name, type, size, fullPath));
+
+                        // 🔥 WINDOWS THROTTLE: Send both count AND path separated by ":::"
+                        throttleCounter++;
+                        if (throttleCounter % 40 == 0 && progressCallback != null) {
+                            progressCallback.accept(throttleCounter + ":::" + fullPath);
+                        }
                     }
                     
                 } catch (SecurityException se) {

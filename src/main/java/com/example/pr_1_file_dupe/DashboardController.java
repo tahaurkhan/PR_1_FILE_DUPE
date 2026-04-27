@@ -4,8 +4,6 @@ import com.example.pr_1_file_dupe.service.FileScanner;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -21,9 +19,17 @@ public class DashboardController {
     @FXML private Label     totalSavedLabel;
     @FXML private Label     groupsFoundLabel;
     @FXML private Label     scannedCountLabel;
+    
+    // 🔥 WINDOWS ANIMATION CONTROLS
+    @FXML private ProgressBar scanProgressBar;
+    @FXML private Label       scanDetailsLabel;
+    @FXML private Label       scanCountLabel;
 
     public static Map<String, List<FileData>> lastScanResults;
     private Tooltip pathTooltip;
+    
+    // 🔥 TRACKS THE ACTIVE SCAN SO WE CAN CANCEL IT
+    private Task<Map<String, List<FileData>>> currentScanTask;
 
     @FXML
     public void initialize() {
@@ -97,28 +103,33 @@ public class DashboardController {
             return;
         }
 
-        new DataStore().setLastFolder(targetFolder);
+        prepareUIForScan(targetFolder);
 
-        loadingBox.setVisible(true);
-        scanButton.setDisable(true);
         System.out.println("🔍 Initializing scanner for: " + targetFolder);
 
-        //    add sound program
-        
+        // add sound program
         com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.SCAN_START);
-        Task<Map<String, List<FileData>>> scanTask = new Task<>() {
+        
+        currentScanTask = new Task<>() {
             @Override
             protected Map<String, List<FileData>> call() throws Exception {
                 FileScanner scanner = new FileScanner();
-                List<FileData> scannedFiles = scanner.scanDirectory(targetFolder);
+                List<FileData> scannedFiles = scanner.scanDirectory(targetFolder, path -> updateMessage(path));
+                
+                // 🔥 Stop if user clicked cancel during the scan phase
+                if (isCancelled()) return null;
+                
+                updateMessage("0:::Analyzing hashes for duplicates...");
                 return new DuplicateFinder().findDuplicates(scannedFiles);
             }
         };
 
-        scanTask.setOnSucceeded(e -> handleScanSuccess(scanTask));
-        scanTask.setOnFailed(e -> handleScanFailure(scanTask));
+        attachWindowsListener(currentScanTask);
 
-        Thread t = new Thread(scanTask);
+        currentScanTask.setOnSucceeded(e -> handleScanSuccess(currentScanTask));
+        currentScanTask.setOnFailed(e -> handleScanFailure(currentScanTask));
+
+        Thread t = new Thread(currentScanTask);
         t.setDaemon(true);
         t.start();
     }
@@ -140,25 +151,35 @@ public class DashboardController {
             return;
         }
         
-        loadingBox.setVisible(true);
-        scanButton.setDisable(true);
-        System.out.println("🌐 Initializing FULL SYSTEM scan...");
+        prepareUIForScan("FULL SYSTEM");
 
-        Task<Map<String, List<FileData>>> scanTask = new Task<>() {
+        System.out.println("🌐 Initializing FULL SYSTEM scan...");
+        
+        com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.SCAN_START);
+
+        currentScanTask = new Task<>() {
             @Override
             protected Map<String, List<FileData>> call() throws Exception {
                 FileScanner scanner = new FileScanner();
-                List<FileData> scannedFiles = scanner.scanFullSystem();
+                List<FileData> scannedFiles = scanner.scanFullSystem(path -> updateMessage(path));
+                
+                // 🔥 Stop if user clicked cancel during the scan phase
+                if (isCancelled()) return null;
+                
+                updateMessage("0:::Analyzing hashes for duplicates...");
                 return new DuplicateFinder().findDuplicates(scannedFiles);
             }
         };
 
-        scanTask.setOnSucceeded(e -> {
-            Map<String, List<FileData>> duplicates = scanTask.getValue();
+        attachWindowsListener(currentScanTask);
+
+        currentScanTask.setOnSucceeded(e -> {
+            if (currentScanTask.isCancelled() || currentScanTask.getValue() == null) return;
+            
+            Map<String, List<FileData>> duplicates = currentScanTask.getValue();
             lastScanResults = duplicates;
 
-            int totalFiles = duplicates.values().stream()
-                    .mapToInt(List::size).sum();
+            int totalFiles = duplicates.values().stream().mapToInt(List::size).sum();
             new DataStore().updateStats(0, duplicates.size(), totalFiles);
 
             initialize();
@@ -183,21 +204,73 @@ public class DashboardController {
                 javafx.scene.control.Button btnDup = (javafx.scene.control.Button) root.lookup("#btnDuplicates");
                 
                 if (btnDup != null) {
-                    btnDup.fire(); // This safely triggers MainController.showDuplicates()
+                    btnDup.fire();
                 }
             } catch (Exception ex) {
                 System.out.println("Auto-switch failed, but scan data is saved.");
             }
-        });	
+        });
 
-        scanTask.setOnFailed(e -> handleScanFailure(scanTask));
+        currentScanTask.setOnFailed(e -> handleScanFailure(currentScanTask));
 
-        Thread t = new Thread(scanTask);
+        Thread t = new Thread(currentScanTask);
         t.setDaemon(true);
         t.start();
     }
+    
+    // 🔥 METHOD TO CANCEL SCAN SAFELY
+    @FXML
+    public void cancelScan(ActionEvent event) {
+        if (currentScanTask != null && currentScanTask.isRunning()) {
+            System.out.println("🛑 Scan cancelled by user.");
+            currentScanTask.cancel(true); // Sends the interrupt signal to the thread
+            
+            // Roll back the UI immediately
+            loadingBox.setVisible(false);
+            scanButton.setDisable(false);
+            if (scanDetailsLabel != null) scanDetailsLabel.textProperty().unbind();
+            
+            new Alert(Alert.AlertType.INFORMATION, "Scan was successfully cancelled.").showAndWait();
+        }
+    }
+
+    private void prepareUIForScan(String folder) {
+        if (!folder.equals("FULL SYSTEM")) {
+            new DataStore().setLastFolder(folder);
+        }
+        loadingBox.setVisible(true);
+        scanButton.setDisable(true);
+        if(scanDetailsLabel != null) {
+            scanDetailsLabel.textProperty().unbind(); 
+            scanDetailsLabel.setText("Name: Preparing...");
+            if (scanCountLabel != null) {
+                scanCountLabel.setText("Items scanned: 0");
+            }
+        }
+    }
+
+    private void attachWindowsListener(Task<?> scanTask) {
+        scanTask.messageProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && newVal.contains(":::")) {
+                String[] parts = newVal.split(":::");
+                javafx.application.Platform.runLater(() -> {
+                    if (scanCountLabel != null) scanCountLabel.setText("Items scanned: " + parts[0]);
+                    String path = parts[1];
+                    if (path.length() > 65) path = path.substring(0, 15) + "..." + path.substring(path.length() - 45);
+                    if (scanDetailsLabel != null) scanDetailsLabel.setText("Name: " + path);
+                });
+            } else {
+                javafx.application.Platform.runLater(() -> {
+                    if (scanDetailsLabel != null) scanDetailsLabel.setText(newVal);
+                });
+            }
+        });
+    }
 
     private void handleScanSuccess(Task<Map<String, List<FileData>>> scanTask) {
+        // 🔥 Ensure we don't try to load results if it was cancelled
+        if (scanTask.isCancelled() || scanTask.getValue() == null) return;
+        
         Map<String, List<FileData>> duplicates = scanTask.getValue();
         lastScanResults = duplicates;
 
@@ -208,37 +281,37 @@ public class DashboardController {
         initialize();
         loadingBox.setVisible(false);
         scanButton.setDisable(false);
+        
+        if(scanDetailsLabel != null) {
+            scanDetailsLabel.textProperty().unbind();
+        }
 
         // Play completion sound
         com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.SCAN_COMPLETE);
 
-        // 🔥 AUTOMATIC SWITCH: Access the MainController and trigger the Duplicates button
         try {
-            // Find the root BorderPane
             javafx.scene.layout.BorderPane root = (javafx.scene.layout.BorderPane) pathInputField.getScene().getRoot();
-            
-            // Find the btnDuplicates from the sidebar
-            // This assumes btnDuplicates is defined in your main.fxml
             javafx.scene.control.Button btnDup = (javafx.scene.control.Button) root.lookup("#btnDuplicates");
-            
-            if (btnDup != null) {
-                // Programmatically click the button to trigger logic in MainController
-                btnDup.fire();
-            }
+            if (btnDup != null) btnDup.fire();
         } catch (Exception ex) {
             System.out.println("Auto-switch failed, but scan data is saved.");
         }
     }   
-    
 
     private void handleScanFailure(Task<Map<String, List<FileData>>> scanTask) {
+        // 🔥 If the failure was due to user cancellation, ignore the error
+        if (scanTask.isCancelled()) return;
+        
         loadingBox.setVisible(false);
         scanButton.setDisable(false);
         
-        Throwable ex = scanTask.getException();
-        ex.printStackTrace();
+        if(scanDetailsLabel != null) {
+            scanDetailsLabel.textProperty().unbind();
+        }
         
-        new Alert(Alert.AlertType.ERROR, 
-            "Scan failed: " + ex.getMessage()).showAndWait();
+        Throwable ex = scanTask.getException();
+        if (ex != null) ex.printStackTrace();
+        
+        new Alert(Alert.AlertType.ERROR, "Scan failed: " + (ex != null ? ex.getMessage() : "Unknown error")).showAndWait();
     }
 }
