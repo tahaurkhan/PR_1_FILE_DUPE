@@ -166,30 +166,29 @@ public class DashboardController {
             loadingBox.setVisible(false);
             scanButton.setDisable(false);
 
+            // Show completion popup first
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("System Scan Complete");
+            alert.setHeaderText("✅ Full system scan complete!");
+            alert.setContentText(
+                "Found " + duplicates.size() + " duplicate groups\n" +
+                "Total files: " + totalFiles + "\n\n" +
+                "💡 Next scan will be MUCH faster!"
+            );
+            alert.showAndWait();
+
+            // 🔥 SAFELY SWITCH SCREENS USING YOUR MAIN CONTROLLER
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(
-                        "/com/example/pr_1_file_dupe/fxml/dupelicate.fxml"));
-                Parent duplicatesScreen = loader.load();
-
-                BorderPane mainLayout = (BorderPane) pathInputField.getScene().getRoot();
-                mainLayout.setCenter(duplicatesScreen);
-
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("System Scan Complete");
-                alert.setHeaderText("✅ Full system scan complete!");
-                alert.setContentText(
-                    "Foun     d " + duplicates.size() + " duplicate groups\n" +
-                    "Total files: " + totalFiles + "\n\n" +
-                    "💡 Next scan will be MUCH faster!"
-                );
-                alert.showAndWait();
-
+                javafx.scene.layout.BorderPane root = (javafx.scene.layout.BorderPane) pathInputField.getScene().getRoot();
+                javafx.scene.control.Button btnDup = (javafx.scene.control.Button) root.lookup("#btnDuplicates");
+                
+                if (btnDup != null) {
+                    btnDup.fire(); // This safely triggers MainController.showDuplicates()
+                }
             } catch (Exception ex) {
-                ex.printStackTrace();
-                new Alert(Alert.AlertType.ERROR, 
-                    "Could not load results: " + ex.getMessage()).showAndWait();
+                System.out.println("Auto-switch failed, but scan data is saved.");
             }
-        });
+        });	
 
         scanTask.setOnFailed(e -> handleScanFailure(scanTask));
 
