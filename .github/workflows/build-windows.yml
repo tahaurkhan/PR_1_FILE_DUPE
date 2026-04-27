@@ -16,8 +16,8 @@ jobs:
     - name: Set up Java
       uses: actions/setup-java@v4
       with:
-        java-version: '25-ea' 
-        distribution: 'oracle'
+        java-version: '25' 
+        distribution: 'temurin'
         cache: maven
 
     - name: Build with Maven
@@ -26,7 +26,7 @@ jobs:
     - name: Prepare Installer Files
       shell: cmd
       run: |
-        mkdir target\installer-input
+        if not exist target\installer-input mkdir target\installer-input
         copy target\*.jar target\installer-input\
         mvn dependency:copy-dependencies -DoutputDirectory=target\installer-input
 
