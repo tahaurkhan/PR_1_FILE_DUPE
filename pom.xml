@@ -109,8 +109,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
+                        <version>3.5.0</version> <executions>
                             <execution>
                                 <id>jpackage-windows</id>
                                 <phase>package</phase>
@@ -144,8 +143,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
+                        <version>3.5.0</version> <executions>
                             <execution>
                                 <id>jpackage-linux</id>
                                 <phase>package</phase>
