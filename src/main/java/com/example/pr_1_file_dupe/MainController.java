@@ -36,40 +36,33 @@ public class MainController {
     private boolean sidebarVisible = true;
     private double  currentZoom    = 1.0;
     
+    // View Cache to make switching tabs instant
     private Map<String, Parent> viewCache = new HashMap<>();
-
     private Parent dashboardView = null;
     
-    // 🔥 NEW IDE-STYLE ZOOM ENGINE
+    // IDE-STYLE ZOOM ENGINE
     private ScrollPane masterScrollPane = new ScrollPane();
     private Group zoomGroup = new Group();
     private StackPane centerWrapper = new StackPane();
 
     @FXML
     public void initialize() {
-<<<<<<< HEAD
         DataStore store = new DataStore();
         com.example.pr_1_file_dupe.utils.SoundManager.setSoundEnabled(store.isSoundEnabled());
         com.example.pr_1_file_dupe.utils.SoundManager.setVolume(store.getSoundVolume());
 
-=======
->>>>>>> 056546b (some sound work)
         if (mainLayout.getScene() != null) {
             mainLayout.getScene().getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/application.css").toExternalForm());
         } else {
             mainLayout.sceneProperty().addListener((obs, oldScene, newScene) -> {
-<<<<<<< HEAD
                 if (newScene != null) {
                     newScene.getStylesheets().clear();
                     newScene.getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/application.css").toExternalForm());
                 }
-=======
-                if (newScene != null) ThemeManager.apply(newScene);
->>>>>>> 056546b (some sound work)
             });
         }
 
-        // 🔥 ASSEMBLE THE MASTER SCROLL WRAPPER
+        // ASSEMBLE THE MASTER SCROLL WRAPPER
         centerWrapper.getChildren().add(zoomGroup);
         masterScrollPane.setContent(centerWrapper);
         masterScrollPane.setFitToWidth(true);
@@ -79,7 +72,7 @@ public class MainController {
         showFiles(null);
     }
 
-    // 🔥 PLACES ALL SCREENS SAFELY INSIDE THE ZOOM ENGINE
+    // PLACES ALL SCREENS SAFELY INSIDE THE ZOOM ENGINE
     private void setMainContent(Parent view) {
         zoomGroup.getChildren().setAll(view);
         if (mainLayout.getCenter() != masterScrollPane) {
@@ -97,7 +90,7 @@ public class MainController {
                 dashboardView = new FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/dashboard.fxml")).load();
             }
             setMainContent(dashboardView);
-            applyZoom(); // Re-apply zoom immediately when switching back
+            applyZoom(); 
         } catch (IOException ex) {
             ex.printStackTrace();
             showError("Error loading Dashboard: " + ex.getMessage());
@@ -107,18 +100,7 @@ public class MainController {
     @FXML 
     public void showDuplicates(ActionEvent e) {
         setActive(btnDuplicates);
-<<<<<<< HEAD
-        java.net.URL url = getClass().getResource("/com/example/pr_1_file_dupe/fxml/duplicate.fxml");
-        if (url == null) { showError("dupelicate.fxml not found."); return; }
-        try { 
-            Parent view = new FXMLLoader(url).load();
-            setMainContent(view);
-            applyZoom();
-        } 
-        catch (Exception ex) { ex.printStackTrace(); showError("Error loading Duplicates: " + ex.getMessage()); }
-=======
-        loadScreen("/com/example/pr_1_file_dupe/fxml/dupelicate.fxml");
->>>>>>> 056546b (some sound work)
+        loadScreen("/com/example/pr_1_file_dupe/fxml/duplicate.fxml");
     }
 
     @FXML 
@@ -127,21 +109,8 @@ public class MainController {
             showError("Please run a scan from the Dashboard first.");
             return; 
         }
-<<<<<<< HEAD
-=======
-        loadScreen("/com/example/pr_1_file_dupe/fxml/categories.fxml");
-    }
->>>>>>> 056546b (some sound work)
-
         setActive(btnCategories);
-        try {
-            Parent view = new FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/categories.fxml")).load();
-            setMainContent(view);
-            applyZoom();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            showError("Could not load the Categories screen.");
-        }
+        loadScreen("/com/example/pr_1_file_dupe/fxml/categories.fxml");
     }
     
     @FXML 
@@ -156,42 +125,48 @@ public class MainController {
         loadScreen("/com/example/pr_1_file_dupe/fxml/settings.fxml");
     }
 
+    // THE MASTER LOAD METHOD: Handles Caching, Sound, and Zoom
     private void loadScreen(String fxmlPath) {
+        com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.NAVIGATION);
+        
         try {
-<<<<<<< HEAD
-            java.net.URL settingsUrl = getClass().getResource("/com/example/pr_1_file_dupe/fxml/settings.fxml");
-            if (settingsUrl == null) { showError("settings.fxml not found."); return; }
-            Parent view = new FXMLLoader(settingsUrl).load();
-            setMainContent(view);
-            applyZoom();
-        } catch (IOException ex) { ex.printStackTrace(); showError("Error loading Settings: " + ex.getMessage()); }
-=======
             if (!viewCache.containsKey(fxmlPath)) {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+                java.net.URL url = getClass().getResource(fxmlPath);
+                if (url == null) { 
+                    showError("File not found: " + fxmlPath); 
+                    return; 
+                }
+                
+                FXMLLoader loader = new FXMLLoader(url);
                 Parent screen = loader.load();
                 
+                // Inject chart data if it's the categories screen
                 if (fxmlPath.contains("categories")) {
                     CategoriesController controller = loader.getController();
-                    controller.generateChart(DashboardController.lastScanResults);
+                    if (controller != null && DashboardController.lastScanResults != null) {
+                        controller.generateChart(DashboardController.lastScanResults);
+                    }
                 }
                 
                 viewCache.put(fxmlPath, screen);
             }
             
             Parent activeScreen = viewCache.get(fxmlPath);
-            activeScreen.setScaleX(currentZoom);
-            activeScreen.setScaleY(currentZoom);
-            mainLayout.setCenter(activeScreen);
+            setMainContent(activeScreen);
+            applyZoom();
             
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("CRITICAL ERROR LOADING: " + fxmlPath);
+            showError("Error loading screen: " + e.getMessage());
         }
->>>>>>> 056546b (some sound work)
     }
 
     @FXML
     public void toggleSidebar() {
+        // Plays a clean click sound every time the sidebar changes size
+        com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.BUTTON_CLICK);
+
         double targetWidth = sidebarVisible ? 45 : 170;
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.millis(200),
@@ -202,7 +177,6 @@ public class MainController {
         );
         timeline.setOnFinished(ev -> {
             boolean nowVisible = targetWidth > 45;
-            // Extra safety checks for the animation
             if(btnFiles != null) btnFiles.setText(nowVisible ? "🗂  Files" : "🗂");
             if(btnDuplicates != null) btnDuplicates.setText(nowVisible ? "⧉   Duplicates" : "⧉");
             if(btnCategories != null) btnCategories.setText(nowVisible ? "📊  Categories" : "📊");
@@ -213,7 +187,6 @@ public class MainController {
         timeline.play();
     }
 
-    // 🔥 ADDED: The missing menu methods causing the LoadException!
     @FXML public void menuOpenFolder() { showFiles(null); }
     @FXML public void menuNewScan() { showFiles(null); }
     @FXML public void menuSelectAll() { System.out.println("Select All clicked"); }
@@ -232,7 +205,6 @@ public class MainController {
     @FXML public void menuZoomOut() { currentZoom = Math.max(currentZoom - 0.1, 0.6); applyZoom(); }
     @FXML public void menuZoomReset() { currentZoom = 1.0; applyZoom(); }
 
-    // 🔥 APPLIES ZOOM TO THE INNER GROUP (Triggers the scrollbars perfectly)
     private void applyZoom() {
         if (!zoomGroup.getChildren().isEmpty()) {
             javafx.scene.Node view = zoomGroup.getChildren().get(0);
@@ -245,7 +217,6 @@ public class MainController {
         try {
             java.net.URL aboutUrl = getClass().getResource("/com/example/pr_1_file_dupe/fxml/about.fxml");
             if (aboutUrl != null) {
-<<<<<<< HEAD
                 Parent view = new FXMLLoader(aboutUrl).load();
                 setMainContent(view);
                 applyZoom();
@@ -255,9 +226,6 @@ public class MainController {
                 about.setHeaderText("Duplicate File Detector  v1.0");
                 about.setContentText("A smart tool to find and remove duplicate files.");
                 about.showAndWait();
-=======
-                mainLayout.setCenter(new FXMLLoader(aboutUrl).load());
->>>>>>> 056546b (some sound work)
             }
         } catch (IOException ex) { showError("Error loading About screen."); }
     }
@@ -283,7 +251,6 @@ public class MainController {
     }
 
     private void setActive(Button clicked) {
-        // 🔥 ADDED: The null check to prevent silent startup crashes
         if (clicked == null) return;
         
         if (activeButton != null) {
@@ -295,20 +262,6 @@ public class MainController {
         activeButton = clicked;
     }
 
-<<<<<<< HEAD
-    private void loadScreen(String fxmlPath) {
-    	com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.NAVIGATION);
-        
-        try { 
-            Parent view = new FXMLLoader(getClass().getResource(fxmlPath)).load();
-            setMainContent(view);
-            applyZoom();
-        } 
-        catch (IOException e) { showError("Error loading screen: " + fxmlPath); }
-    }
-
-=======
->>>>>>> 056546b (some sound work)
     private void showError(String msg) {
         Alert a = new Alert(Alert.AlertType.WARNING);
         a.setTitle("Notice");

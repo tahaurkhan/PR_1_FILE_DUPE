@@ -1,4 +1,4 @@
-package com.example.pr_1_file_dupe.utils;
+   package com.example.pr_1_file_dupe.utils;
 
 import javafx.application.Platform;
 import javafx.scene.media.AudioClip;
@@ -10,7 +10,6 @@ public class SoundManager {
     private static double volume = 0.5;
 
     public enum Sound {
-        // 🔥 FIXED: Pointing to the .mp3 files you generated
         SCAN_START("scan_start.mp3"),
         SCAN_COMPLETE("scan_compleate.mp3"),
         DELETE_FILE("delete.mp3"),
@@ -27,15 +26,7 @@ public class SoundManager {
     public static void play(Sound sound) {
         if (!soundEnabled) return;
         try {
-<<<<<<< HEAD
-            URL resource = SoundManager.class.getResource(
-                    "/com/example/pr_1_file_dupe/sound/" + sound.getFilename()
-            );
-
-=======
-            // 🔥 FIXED: Pointing to the "sound/" folder (no 's' at the end)
             URL resource = SoundManager.class.getResource("/com/example/pr_1_file_dupe/sound/" + sound.getFilename());
->>>>>>> 056546b (some sound work)
             if (resource == null) {
                 System.out.println("❌ Sound file not found: " + sound.getFilename());
                 return;
