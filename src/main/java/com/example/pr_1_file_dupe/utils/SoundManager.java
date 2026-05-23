@@ -15,7 +15,7 @@ public class SoundManager {
         DELETE_FILE("delete.mp3"),
         BUTTON_CLICK("click.mp3"),
         ERROR("error.mp3"),
-        SUCCESS("succes.mp3"),
+        SUCCESS("success.mp3"),
         NAVIGATION("nav.mp3");
 
         private final String filename;

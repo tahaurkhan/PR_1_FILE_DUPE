@@ -23,55 +23,54 @@ import java.util.Map;
 public class MainController {
 
     @FXML private BorderPane mainLayout;
-    @FXML private VBox       sidebarPane;
-    @FXML private Button     hamburgerBtn;
-    @FXML private Button     btnFiles;
-    @FXML private Button     btnDuplicates;
-    @FXML private Button     btnCategories;
-    @FXML private Button     btnRecovery;
-    @FXML private Button     btnSettings;
-    @FXML private StackPane  contentPane;
-
-    private Button  activeButton   = null;
+    @FXML private VBox sidebarPane;
+    @FXML private Button hamburgerBtn;
+    @FXML private Button btnFiles;
+    @FXML private Button btnDuplicates;
+    @FXML private Button btnCategories;
+    @FXML private Button btnRecovery;
+    @FXML private Button btnSettings;
+    @FXML private StackPane contentPane;
+    
+    private Button activeButton = null;
     private boolean sidebarVisible = true;
-    private double  currentZoom    = 1.0;
+    private double currentZoom = 1.0;
     
     // View Cache to make switching tabs instant
     private Map<String, Parent> viewCache = new HashMap<>();
     private Parent dashboardView = null;
-    
+
     // IDE-STYLE ZOOM ENGINE
     private ScrollPane masterScrollPane = new ScrollPane();
     private Group zoomGroup = new Group();
     private StackPane centerWrapper = new StackPane();
-
+    
     @FXML
     public void initialize() {
         DataStore store = new DataStore();
         com.example.pr_1_file_dupe.utils.SoundManager.setSoundEnabled(store.isSoundEnabled());
         com.example.pr_1_file_dupe.utils.SoundManager.setVolume(store.getSoundVolume());
-
+    
         if (mainLayout.getScene() != null) {
-            mainLayout.getScene().getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/application.css").toExternalForm());
+            applyActiveTheme(mainLayout.getScene(), store.isDarkTheme());
         } else {
             mainLayout.sceneProperty().addListener((obs, oldScene, newScene) -> {
                 if (newScene != null) {
-                    newScene.getStylesheets().clear();
-                    newScene.getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/application.css").toExternalForm());
+                    applyActiveTheme(newScene, store.isDarkTheme());
                 }
             });
         }
-
+            
         // ASSEMBLE THE MASTER SCROLL WRAPPER
         centerWrapper.getChildren().add(zoomGroup);
         masterScrollPane.setContent(centerWrapper);
         masterScrollPane.setFitToWidth(true);
         masterScrollPane.setFitToHeight(true);
-        masterScrollPane.setStyle("-fx-background: #f8fcfd; -fx-background-color: transparent; -fx-border-color: transparent;");
-
+        masterScrollPane.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
+        
         showFiles(null);
     }
-
+        
     // PLACES ALL SCREENS SAFELY INSIDE THE ZOOM ENGINE
     private void setMainContent(Parent view) {
         zoomGroup.getChildren().setAll(view);
@@ -80,17 +79,17 @@ public class MainController {
         }
     }
 
-    @FXML 
+    @FXML
     public void showFiles(ActionEvent e) {
         setActive(btnFiles);
         com.example.pr_1_file_dupe.utils.SoundManager.play(com.example.pr_1_file_dupe.utils.SoundManager.Sound.NAVIGATION);
-        
+            
         try {
             if (dashboardView == null) {
                 dashboardView = new FXMLLoader(getClass().getResource("/com/example/pr_1_file_dupe/fxml/dashboard.fxml")).load();
             }
             setMainContent(dashboardView);
-            applyZoom(); 
+            applyZoom();
         } catch (IOException ex) {
             ex.printStackTrace();
             showError("Error loading Dashboard: " + ex.getMessage());
@@ -268,5 +267,16 @@ public class MainController {
         a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();
+    }
+
+    private void applyActiveTheme(javafx.scene.Scene scene, boolean dark) {
+        if (scene != null) {
+            scene.getStylesheets().clear();
+            if (dark) {
+                scene.getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/dark-theme.css").toExternalForm());
+            } else {
+                scene.getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/application.css").toExternalForm());
+            }
+        }
     }
 }

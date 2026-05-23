@@ -138,11 +138,11 @@ public class DuplicatesController {
                     setGraphic(null);
                 } else if (isPreviewable(rowData.getName())) {
                     actionBtn.setText("👁 View");
-                    actionBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-size: 11px; -fx-font-weight: bold;");
+                    actionBtn.setStyle("-fx-background-color: -info; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-size: 11px; -fx-font-weight: bold;");
                     setGraphic(actionBtn);
                 } else {
                     actionBtn.setText("↗ Open");
-                    actionBtn.setStyle("-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-size: 11px; -fx-font-weight: bold;");
+                    actionBtn.setStyle("-fx-background-color: -surface-side; -fx-text-fill: -on-surface; -fx-background-radius: 5; -fx-font-size: 11px; -fx-font-weight: bold;");
                     setGraphic(actionBtn);
                 }
             }
@@ -187,7 +187,14 @@ public class DuplicatesController {
 
             Stage stage = new Stage();
             stage.setTitle("Preview: " + data.getName());
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            DataStore store = new DataStore();
+            if (store.isDarkTheme()) {
+                scene.getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/dark-theme.css").toExternalForm());
+            } else {
+                scene.getStylesheets().add(getClass().getResource("/com/example/pr_1_file_dupe/CSS/application.css").toExternalForm());
+            }
+            stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.show();
         } catch (IOException e) {

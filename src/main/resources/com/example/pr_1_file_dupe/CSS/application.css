@@ -541,3 +541,11 @@
 .tip-panel .label {
     -fx-text-fill: #1e8449;
 }
+
+/* ============================================================
+   SCROLL PANE
+   ============================================================ */
+.scroll-pane {
+    -fx-background: -surface;
+    -fx-background-color: transparent;
+}

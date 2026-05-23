@@ -6,15 +6,21 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="10.0" style="-fx-padding: 20px; -fx-background-color: #f8fcfd;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.pr_1_file_dupe.ResultsController">
-    
+<VBox spacing="10.0" style="-fx-padding: 20px; -fx-background-color: -surface;"
+    xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.example.pr_1_file_dupe.ResultsController">
+
     <HBox alignment="CENTER_LEFT" spacing="20.0">
         <VBox>
-            <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Scan Results" />
-            <Label style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;" text="Select redundant copies and click Delete to reclaim space." />
+            <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: -on-surface;"
+                text="Scan Results" />
+            <Label style="-fx-font-size: 14px; -fx-text-fill: -on-muted;"
+                text="Select redundant copies and click Delete to reclaim space." />
         </VBox>
-        
-        <Button onAction="#deleteSelectedFiles" prefHeight="40.0" style="-fx-background-color: #ff4757; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;" text="🗑 Delete Selected" />
+
+        <Button onAction="#deleteSelectedFiles" prefHeight="40.0"
+            style="-fx-background-color: -danger; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"
+            text="🗑 Delete Selected" />
     </HBox>
 
     <TreeTableView fx:id="resultsTable" VBox.vgrow="ALWAYS" prefHeight="500.0" editable="true">
@@ -25,5 +31,5 @@
             <TreeTableColumn fx:id="pathColumn" prefWidth="450.0" text="File Path / Space Saved" />
         </columns>
     </TreeTableView>
-    
+
 </VBox>
