@@ -111,7 +111,25 @@ public class DashboardController {
                 
                 if (isCancelled()) return null;
                 
-                updateMessage("0:::Analyzing hashes for duplicates...");
+                HashDatabase hashDB = new HashDatabase();
+                boolean isIdentical = hashDB.isFolderIdenticalToDatabase(scannedFiles, targetFolder);
+                
+                if (isIdentical) {
+                    javafx.application.Platform.runLater(() -> {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Database Cache Hit");
+                        alert.setHeaderText("Folder matches database cache");
+                        alert.setContentText("All files are identical to the database. Showing database info only (no re-scan needed).");
+                        alert.show();
+                    });
+                } else {
+                    hashDB.clearFolderCache(targetFolder);
+                    javafx.application.Platform.runLater(() -> {
+                        System.out.println("Folder content has changed. Scanning all folder as new!");
+                    });
+                }
+                
+                updateMessage("-1.0|0|Analyzing hashes for duplicates...");
                 
                 // 🔥 FIXED: Pass progress callback to DuplicateFinder!
                 return new DuplicateFinder().findDuplicates(scannedFiles, path -> updateMessage(path));
@@ -159,7 +177,7 @@ public class DashboardController {
                 
                 if (isCancelled()) return null;
                 
-                updateMessage("0:::Analyzing hashes for duplicates...");
+                updateMessage("-1.0|0|Analyzing hashes for duplicates...");
                 
                 // 🔥 FIXED: Pass progress callback to DuplicateFinder!
                 return new DuplicateFinder().findDuplicates(scannedFiles, path -> updateMessage(path));
@@ -220,6 +238,7 @@ public class DashboardController {
             loadingBox.setVisible(false);
             scanButton.setDisable(false);
             if (scanDetailsLabel != null) scanDetailsLabel.textProperty().unbind();
+            scanProgressBar.setProgress(0.0);
             
             new Alert(Alert.AlertType.INFORMATION, "Scan was successfully cancelled.").showAndWait();
         }
@@ -242,17 +261,35 @@ public class DashboardController {
 
     private void attachWindowsListener(Task<?> scanTask) {
         scanTask.messageProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && newVal.contains(":::")) {
-                String[] parts = newVal.split(":::");
+            if (newVal != null) {
                 javafx.application.Platform.runLater(() -> {
-                    if (scanCountLabel != null) scanCountLabel.setText("Items scanned: " + parts[0]);
-                    String path = parts[1];
-                    if (path.length() > 65) path = path.substring(0, 15) + "..." + path.substring(path.length() - 45);
-                    if (scanDetailsLabel != null) scanDetailsLabel.setText("Name: " + path);
-                });
-            } else {
-                javafx.application.Platform.runLater(() -> {
-                    if (scanDetailsLabel != null) scanDetailsLabel.setText(newVal);
+                    if (newVal.contains("|")) {
+                        String[] parts = newVal.split("\\|");
+                        if (parts.length >= 3) {
+                            try {
+                                double progress = Double.parseDouble(parts[0]);
+                                scanProgressBar.setProgress(progress);
+                            } catch (NumberFormatException ignored) {}
+
+                            if (scanCountLabel != null) scanCountLabel.setText("Items scanned: " + parts[1]);
+                            String path = parts[2];
+                            if (path.length() > 65) {
+                                path = path.substring(0, 15) + "..." + path.substring(path.length() - 45);
+                            }
+                            if (scanDetailsLabel != null) scanDetailsLabel.setText(path);
+                        }
+                    } else if (newVal.contains(":::")) {
+                        String[] parts = newVal.split(":::");
+                        if (scanCountLabel != null) scanCountLabel.setText("Items scanned: " + parts[0]);
+                        String path = parts[1];
+                        if (path.length() > 65) {
+                            path = path.substring(0, 15) + "..." + path.substring(path.length() - 45);
+                        }
+                        if (scanDetailsLabel != null) scanDetailsLabel.setText("Name: " + path);
+                        scanProgressBar.setProgress(-1.0);
+                    } else {
+                        if (scanDetailsLabel != null) scanDetailsLabel.setText(newVal);
+                    }
                 });
             }
         });

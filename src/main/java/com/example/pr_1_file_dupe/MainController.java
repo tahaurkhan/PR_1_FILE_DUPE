@@ -200,6 +200,18 @@ public class MainController {
         confirm.showAndWait().ifPresent(btn -> { if (btn == javafx.scene.control.ButtonType.OK) javafx.application.Platform.exit(); });
     }
 
+    @FXML public void menuRestart() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Restart Application");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Are you sure you want to restart the application?");
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn == javafx.scene.control.ButtonType.OK) {
+                HelloApplication.restart();
+            }
+        });
+    }
+
     @FXML public void menuZoomIn() { currentZoom = Math.min(currentZoom + 0.1, 2.0); applyZoom(); }
     @FXML public void menuZoomOut() { currentZoom = Math.max(currentZoom - 0.1, 0.6); applyZoom(); }
     @FXML public void menuZoomReset() { currentZoom = 1.0; applyZoom(); }

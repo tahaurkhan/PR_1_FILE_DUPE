@@ -23,7 +23,7 @@ public class DuplicateFinder {
 
         // Step 1: Group by Size
         if (progressCallback != null) {
-            progressCallback.accept("0:::Grouping files by size...");
+            progressCallback.accept("-1.0|0|Grouping files by size...");
         }
         
         Map<Long, List<FileData>> sizeMap = new HashMap<>();
@@ -40,7 +40,7 @@ public class DuplicateFinder {
         }
 
         if (progressCallback != null) {
-            progressCallback.accept("0:::Found " + totalToHash + " potential duplicates. Computing hashes...");
+            progressCallback.accept("-1.0|0|Found " + totalToHash + " potential duplicates. Computing hashes...");
         }
 
         // Step 3: Group by Hash with PROGRESS REPORTING
@@ -51,8 +51,14 @@ public class DuplicateFinder {
         int throttleCounter = 0;
 
         for (List<FileData> sameSizeFiles : sizeMap.values()) {
+            if (Thread.currentThread().isInterrupted()) {
+                break;
+            }
             if (sameSizeFiles.size() > 1) {
                 for (FileData file : sameSizeFiles) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        break;
+                    }
                     try {
                         File f = new File(file.getPath());
                         long lastModified = f.lastModified();
@@ -74,12 +80,12 @@ public class DuplicateFinder {
                         
                         // 🔥 REPORT PROGRESS EVERY 20 FILES (prevent UI lag)
                         if (progressCallback != null && throttleCounter % 20 == 0) {
-                            int percent = (int) ((processed * 100.0) / totalToHash);
+                            double progress = (double) processed / totalToHash;
                             String shortPath = file.getName();
                             if (file.getPath().length() > 50) {
                                 shortPath = "..." + file.getPath().substring(file.getPath().length() - 47);
                             }
-                            progressCallback.accept(processed + ":::Hashing (" + percent + "%): " + shortPath);
+                            progressCallback.accept(progress + "|" + processed + "|Hashing: " + shortPath);
                         }
 
                     } catch (Exception e) {
@@ -92,7 +98,7 @@ public class DuplicateFinder {
         hashDB.save();
         
         if (progressCallback != null) {
-            progressCallback.accept(processed + ":::Finalizing results...");
+            progressCallback.accept("1.0|" + processed + "|Finalizing results...");
         }
         
         System.out.println("✅ Hash analysis complete: " + hashedCount + " hashed, " + cachedCount + " from cache");

@@ -16,6 +16,7 @@
                 <items>
                     <MenuItem text="Open Folder..." onAction="#menuOpenFolder" accelerator="CTRL+O" />
                     <MenuItem text="New Scan" onAction="#menuNewScan" accelerator="CTRL+N" />
+                    <MenuItem text="Restart" onAction="#menuRestart" accelerator="CTRL+R" />
                     <SeparatorMenuItem />
                     <MenuItem text="Quit" onAction="#menuQuit" accelerator="CTRL+Q" />
                 </items>

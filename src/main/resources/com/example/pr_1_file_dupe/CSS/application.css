@@ -549,3 +549,31 @@
     -fx-background: -surface;
     -fx-background-color: transparent;
 }
+
+/* ============================================================
+   PROGRESS BAR (UPGRADED)
+   ============================================================ */
+.progress-bar {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.progress-bar .track {
+    -fx-background-color: -surface-side;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-border-color: #ced6d6;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+}
+
+.progress-bar .bar {
+    -fx-background-color: linear-gradient(to right, -primary, #009e9e);
+    -fx-background-insets: 1;
+    -fx-background-radius: 9;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 101, 101, 0.25), 6, 0, 0, 1);
+}
+
+.progress-bar:indeterminate .bar {
+    -fx-background-color: linear-gradient(to right, -primary, #00a8a8, -primary);
+}

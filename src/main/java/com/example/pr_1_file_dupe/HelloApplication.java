@@ -139,6 +139,34 @@ public class HelloApplication extends Application {
         delay.play();
     }
 
+    public static void restart() {
+        try {
+            String javaBin = System.getProperty("java.home") + java.io.File.separator + "bin" + java.io.File.separator + "java";
+            java.io.File currentJar = new java.io.File(HelloApplication.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+
+            java.util.List<String> command = new java.util.ArrayList<>();
+            command.add(javaBin);
+            
+            if (currentJar.getName().endsWith(".jar")) {
+                command.add("-jar");
+                command.add(currentJar.getPath());
+            } else {
+                command.add("-cp");
+                command.add(System.getProperty("java.class.path"));
+                command.add(HelloApplication.class.getName());
+            }
+
+            new ProcessBuilder(command).start();
+            System.exit(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            javafx.application.Platform.runLater(() -> {
+                javafx.application.Platform.exit();
+                System.exit(0);
+            });
+        }
+    }
+
     public static void main(String[] args) {
         launch();
     }

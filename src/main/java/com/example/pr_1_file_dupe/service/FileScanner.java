@@ -44,7 +44,7 @@ public class FileScanner {
         // 🔥 PASS 1: Indexing Sizes
         // ==========================================
         if (progressCallback != null) {
-            progressCallback.accept("0:::PASS 1: Indexing file sizes to save memory...");
+            progressCallback.accept("-1.0|0|PASS 1: Indexing file sizes to save memory...");
         }
 
         for (File root : roots) {
@@ -59,7 +59,7 @@ public class FileScanner {
         // If cancelled during Pass 1, we have no paths to show yet.
         if (isCancelled && duplicateSizes.isEmpty()) {
             if (progressCallback != null) {
-                progressCallback.accept("0:::Scan cancelled before paths could be collected.");
+                progressCallback.accept("-1.0|0|Scan cancelled before paths could be collected.");
             }
             return new ArrayList<>();
         }
@@ -68,7 +68,7 @@ public class FileScanner {
         // 🔥 PASS 2: Collecting Paths
         // ==========================================
         if (progressCallback != null) {
-            progressCallback.accept("0:::PASS 2: Collecting matching files...");
+            progressCallback.accept("-1.0|0|PASS 2: Collecting matching files...");
         }
 
         List<FileData> potentialDuplicates = new ArrayList<>();
@@ -81,7 +81,7 @@ public class FileScanner {
         }
 
         if (isCancelled && progressCallback != null) {
-            progressCallback.accept("0:::Scan Stopped. Loading partial results...");
+            progressCallback.accept("-1.0|0|Scan Stopped. Loading partial results...");
         }
 
         duplicateSizes.clear();
@@ -105,14 +105,14 @@ public class FileScanner {
         long minSizeInBytes = store.getMinFileSizeKB() * 1024;
 
         if (progressCallback != null) {
-            progressCallback.accept("0:::PASS 1: Indexing file sizes...");
+            progressCallback.accept("-1.0|0|PASS 1: Indexing file sizes...");
         }
         passOneRecursive(root, skipHidden, minSizeInBytes, progressCallback);
 
         seenSizes.clear();
 
         if (progressCallback != null) {
-            progressCallback.accept("0:::PASS 2: Collecting matching files...");
+            progressCallback.accept("-1.0|0|PASS 2: Collecting matching files...");
         }
         List<FileData> potentialDuplicates = new ArrayList<>();
         passTwoRecursive(root, potentialDuplicates, skipHidden, minSizeInBytes, progressCallback);
@@ -125,7 +125,7 @@ public class FileScanner {
     // RECURSIVE LOGIC: PASS 1
     // ==========================================
     private void passOneRecursive(File folder, boolean skipHidden, long minSizeInBytes, Consumer<String> progressCallback) {
-        if (isCancelled) {
+        if (isCancelled || Thread.currentThread().isInterrupted()) {
             return; // 🔥 Graceful stop check
         }
         if (!isAllowedFolder(folder)) {
@@ -139,7 +139,7 @@ public class FileScanner {
         }
 
         for (File file : files) {
-            if (isCancelled) {
+            if (isCancelled || Thread.currentThread().isInterrupted()) {
                 return;
             }
 
@@ -171,7 +171,7 @@ public class FileScanner {
 
                     throttleCounter++;
                     if (throttleCounter % 60 == 0 && progressCallback != null) {
-                        progressCallback.accept(totalFilesScanned + ":::(Pass 1) Indexing: \n" + file.getAbsolutePath());
+                        progressCallback.accept("-1.0|" + totalFilesScanned + "|Indexing: " + file.getAbsolutePath());
                     }
                 }
             } catch (SecurityException se) {
@@ -184,7 +184,7 @@ public class FileScanner {
     // RECURSIVE LOGIC: PASS 2
     // ==========================================
     private void passTwoRecursive(File folder, List<FileData> fileList, boolean skipHidden, long minSizeInBytes, Consumer<String> progressCallback) {
-        if (isCancelled) {
+        if (isCancelled || Thread.currentThread().isInterrupted()) {
             return; // 🔥 Graceful stop check
         }
         if (!isAllowedFolder(folder)) {
@@ -197,7 +197,7 @@ public class FileScanner {
         }
 
         for (File file : files) {
-            if (isCancelled) {
+            if (isCancelled || Thread.currentThread().isInterrupted()) {
                 return;
             }
 
@@ -225,7 +225,7 @@ public class FileScanner {
 
                     throttleCounter++;
                     if (throttleCounter % 60 == 0 && progressCallback != null) {
-                        progressCallback.accept(totalFilesScanned + ":::(Pass 2) Collecting: " + file.getAbsolutePath());
+                        progressCallback.accept("-1.0|" + totalFilesScanned + "|Collecting: " + file.getAbsolutePath());
                     }
                 }
             } catch (SecurityException se) {

@@ -1,21 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.chart.PieChart?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" spacing="20.0" style="-fx-padding: 40px; -fx-background-color: -surface;"
+<VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-padding: 35 40 40 40; -fx-background-color: -surface;"
     xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="com.example.pr_1_file_dupe.CategoriesController">
 
-    <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: -on-surface;"
-        text="Duplicate Space Analysis" />
-    <Label style="-fx-font-size: 14px; -fx-text-fill: -on-muted;"
-        text="See exactly which types of files are eating up your storage." />
+    <!-- Header Section -->
+    <VBox spacing="4" alignment="TOP_CENTER" style="-fx-padding: 0 0 10 0;">
+        <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: -on-surface;"
+            text="Duplicate Space Analysis" />
+        <Label style="-fx-font-size: 14px; -fx-text-fill: -on-muted;"
+            text="See exactly which types of files are eating up your storage." />
+    </VBox>
 
-    <VBox alignment="CENTER"
-        style="-fx-background-color: -surface-card; -fx-padding: 30px; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
-        <PieChart fx:id="categoryChart" prefHeight="400.0" prefWidth="500.0"
-            title="Wasted Space by Category" />
+    <!-- Grand Summary Card -->
+    <VBox alignment="CENTER" spacing="8" prefWidth="550.0" maxWidth="550.0"
+        style="-fx-background-color: -surface-card; -fx-padding: 20 24; -fx-background-radius: 14; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-border-color: -primary-light; -fx-border-width: 1; -fx-border-radius: 14;">
+        <Label fx:id="totalWastedLabel" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: -danger;" text="0.0 KB" />
+        <Label fx:id="totalFilesLabel" style="-fx-font-size: 13px; -fx-text-fill: -on-muted; -fx-font-weight: bold;" text="0 duplicate files found" />
+    </VBox>
+
+    <!-- Custom Category Progress List -->
+    <VBox spacing="20" prefWidth="550.0" maxWidth="550.0"
+        style="-fx-background-color: -surface-card; -fx-padding: 24 30; -fx-background-radius: 14; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        
+        <!-- Category: Images -->
+        <VBox spacing="6">
+            <HBox alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -on-surface;" text="🖼️  Images" />
+                <Pane HBox.hgrow="ALWAYS" />
+                <Label fx:id="imagesInfoLabel" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -primary;" text="0.0 KB (0%)" />
+            </HBox>
+            <ProgressBar fx:id="imagesProgressBar" prefHeight="10.0" maxWidth="Infinity" progress="0.0" style="-fx-accent: -primary;" />
+            <Label fx:id="imagesCountLabel" style="-fx-font-size: 11px; -fx-text-fill: -on-muted;" text="0 duplicate files" />
+        </VBox>
+
+        <!-- Category: Videos -->
+        <VBox spacing="6">
+            <HBox alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -on-surface;" text="🎬  Videos" />
+                <Pane HBox.hgrow="ALWAYS" />
+                <Label fx:id="videosInfoLabel" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -danger;" text="0.0 KB (0%)" />
+            </HBox>
+            <ProgressBar fx:id="videosProgressBar" prefHeight="10.0" maxWidth="Infinity" progress="0.0" style="-fx-accent: -danger;" />
+            <Label fx:id="videosCountLabel" style="-fx-font-size: 11px; -fx-text-fill: -on-muted;" text="0 duplicate files" />
+        </VBox>
+
+        <!-- Category: Documents -->
+        <VBox spacing="6">
+            <HBox alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -on-surface;" text="📄  Documents" />
+                <Pane HBox.hgrow="ALWAYS" />
+                <Label fx:id="docsInfoLabel" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -warning;" text="0.0 KB (0%)" />
+            </HBox>
+            <ProgressBar fx:id="docsProgressBar" prefHeight="10.0" maxWidth="Infinity" progress="0.0" style="-fx-accent: -warning;" />
+            <Label fx:id="docsCountLabel" style="-fx-font-size: 11px; -fx-text-fill: -on-muted;" text="0 duplicate files" />
+        </VBox>
+
+        <!-- Category: Others -->
+        <VBox spacing="6">
+            <HBox alignment="CENTER_LEFT">
+                <Label style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: -on-surface;" text="📦  Others" />
+                <Pane HBox.hgrow="ALWAYS" />
+                <Label fx:id="othersInfoLabel" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: -info;" text="0.0 KB (0%)" />
+            </HBox>
+            <ProgressBar fx:id="othersProgressBar" prefHeight="10.0" maxWidth="Infinity" progress="0.0" style="-fx-accent: -info;" />
+            <Label fx:id="othersCountLabel" style="-fx-font-size: 11px; -fx-text-fill: -on-muted;" text="0 duplicate files" />
+        </VBox>
+
     </VBox>
 
 </VBox>

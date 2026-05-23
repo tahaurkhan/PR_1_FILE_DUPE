@@ -82,6 +82,66 @@ public class HashDatabase {
         System.out.println("✅ In-memory hash cache cleared");
     }
 
+    // 🔹 Check if all files in the scanned folder exist in cache with matching timestamps, and no files were added or deleted
+    public boolean isFolderIdenticalToDatabase(java.util.List<FileData> scannedFiles, String folderPath) {
+        if (scannedFiles == null) {
+            return false;
+        }
+
+        File dir = new File(folderPath);
+        if (!dir.exists()) {
+            return false;
+        }
+        String normalizedFolder = dir.getAbsolutePath();
+
+        // Count how many files under this folder are stored in the database cache
+        int dbCountForFolder = 0;
+        for (String filePath : cache.keySet()) {
+            File f = new File(filePath);
+            if (f.getAbsolutePath().startsWith(normalizedFolder)) {
+                dbCountForFolder++;
+            }
+        }
+
+        // If counts differ, there's a difference (files added or deleted)
+        if (dbCountForFolder != scannedFiles.size()) {
+            return false;
+        }
+
+        // Check if every scanned file is in cache and matches the modification time exactly
+        for (FileData file : scannedFiles) {
+            String path = file.getPath();
+            CachedHash entry = cache.get(path);
+            if (entry == null) {
+                return false;
+            }
+            File f = new File(path);
+            if (entry.lastModified != f.lastModified()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // 🔹 Remove all cache entries under a folder path to scan as new
+    public void clearFolderCache(String folderPath) {
+        File dir = new File(folderPath);
+        if (!dir.exists()) return;
+        String normalizedFolder = dir.getAbsolutePath();
+
+        int initialSize = cache.size();
+        cache.entrySet().removeIf(entry -> {
+            File f = new File(entry.getKey());
+            return f.getAbsolutePath().startsWith(normalizedFolder);
+        });
+
+        if (cache.size() != initialSize) {
+            save();
+            System.out.println("🧹 Removed " + (initialSize - cache.size()) + " cache entries under folder: " + folderPath);
+        }
+    }
+
     // 🔹 Remove stale entries (files that no longer exist)
     public void cleanStaleEntries() {
         cache.entrySet().removeIf(entry -> !new File(entry.getKey()).exists());
